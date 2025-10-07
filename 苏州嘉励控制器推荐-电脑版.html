@@ -1,0 +1,1944 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光源控制器选型工具</title>
+    
+    <!-- 引入PDF.js库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        
+        .input-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+        
+        .result-section {
+            flex: 2;
+            min-width: 400px;
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #4a6491;
+            outline: none;
+        }
+        
+        button {
+            background: #4a6491;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background: #2c3e50;
+        }
+        
+        .button-group {
+            margin-top: 25px;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4a6491;
+        }
+        
+        .multi-controller-card {
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .model {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .rating {
+            background: #f1c40f;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .multi-rating {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .specs {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .spec-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .spec-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .spec-value {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .no-result {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .match-reason {
+            background: #e8f4fc;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .cable-info {
+            background: #f0f7ee;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .cable-type {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .cable-type-ext {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .cable-type-adpt {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .download-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .download-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        /* 优化后的下载和预览按钮样式 */
+        .download-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .download-btn, .preview-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #5a7ca8;
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            min-width: 0;
+            flex: 0 1 auto;
+        }
+        
+        .preview-btn {
+            background: #28a745;
+        }
+        
+        .download-btn:hover {
+            background: #2c3e50;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+        }
+        
+        .preview-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+        }
+        
+        .download-btn.disabled, .preview-btn.disabled {
+            background: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .download-btn.disabled:hover, .preview-btn.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-icon {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+        
+        /* 放大镜图标 */
+        .preview-icon {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.3-4.3'%3E%3C/path%3E%3C/svg%3E") no-repeat center center;
+        }
+        
+        /* 下载图标 */
+        .download-icon {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'%3E%3C/path%3E%3Cpolyline points='7 10 12 15 17 10'%3E%3C/polyline%3E%3Cline x1='12' y1='15' x2='12' y2='3'%3E%3C/line%3E%3C/svg%3E") no-repeat center center;
+        }
+        
+        /* 禁用状态的图标 */
+        .download-btn.disabled .download-icon,
+        .preview-btn.disabled .preview-icon {
+            opacity: 0.5;
+        }
+        
+        /* 按钮文字 */
+        .btn-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .input-section {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+            
+            .download-buttons {
+                flex-direction: column;
+            }
+            
+            .download-btn, .preview-btn {
+                width: 100%;
+            }
+        }
+        
+        /* 新增样式：优化用户体验 */
+        .input-hint {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4a6491;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .solution-section {
+            margin-top: 30px;
+        }
+        
+        .solution-title {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        .controller-in-solution {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .controller-in-solution:last-child {
+            border-bottom: none;
+        }
+        
+              /* PDF预览模态框样式 - 全屏优化 */
+        .pdf-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow: hidden;
+        }
+        
+        .pdf-modal-content {
+            background-color: #fefefe;
+            margin: 0;
+            padding: 0;
+            border-radius: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: none;
+        }
+        
+        .pdf-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #4a6491;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .pdf-modal-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .pdf-modal-close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pdf-modal-close:hover {
+            color: #f1f1f1;
+        }
+        
+        .pdf-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            background: #f1f1f1;
+            border-bottom: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+        
+        .pdf-nav-controls, .pdf-zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .pdf-control-btn {
+            background: #5a7ca8;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .pdf-control-btn:hover {
+            background: #2c3e50;
+        }
+        
+        .pdf-control-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .pdf-page-info {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .pdf-zoom-info {
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        
+        .pdf-canvas-container {
+            flex: 1;
+            overflow: auto;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        .pdf-canvas {
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+        }
+        
+        .pdf-loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 18px;
+            color: #666;
+        }
+
+        /* 全屏按钮样式 */
+        .pdf-fullscreen-btn {
+            background: #28a745;
+        }
+        
+        .pdf-fullscreen-btn:hover {
+            background: #218838;
+        }
+		.download-btn.disabled, .preview-btn.disabled {
+			background: #ccc;
+			cursor: not-allowed;
+			opacity: 0.6;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>光源控制器选型工具</h1>
+            <p class="subtitle">根据光源参数快速匹配最合适的控制器型号及延长线/转接线（支持恒压（DCV）和恒流(ACC)）- 技术支持部 李哲哲</p>
+        </header>
+        
+        <div class="content">
+            <div class="input-section">
+                <h2>光源参数</h2>
+                <div class="form-group">
+                    <label for="driveType">光源驱动方式</label>
+                    <select id="driveType">
+                        <option value="恒压">恒压</option>
+                        <option value="恒流">恒流</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="voltage">光源电压 (V)</label>
+                    <input type="number" id="voltage" list="voltageList" value="24" min="0" step="0.1">
+                    <datalist id="voltageList">
+                        <option value="24">
+                        <option value="35">
+                        <option value="48">
+                    </datalist>
+                    <div class="input-hint">常见值: 24V, 35V, 48V</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="power">光源功率 (W)</label>
+                    <input type="number" id="power" value="12" min="0" step="0.1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="quantity">光源数量</label>
+                    <input type="number" id="quantity" value="1" min="1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="interface">光源接口</label>
+                    <select id="interface">
+                        <option value="1、3针">1、3针</option>
+                        <option value="大6芯航空母头">大6芯航空母头</option>
+                        <option value="小6芯航空母头">小6芯航空母头</option>
+                        <option value="大6芯航空公头">大6芯航空公头</option>
+                        <option value="小6芯航空公头">小6芯航空公头</option>
+                        <option value="5芯航空接头母头">5芯航空接头母头</option>
+                        <option value="5芯航空接头公头">5芯航空接头公头</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="communication">通讯方式</label>
+                    <select id="communication">
+                        <option value="不限">不限</option>
+                        <option value="无">无</option>
+                        <option value="串口" selected>串口</option>
+                        <option value="485">485</option>
+                        <option value="网口">网口</option>
+                        <option value="串口、485">串口、485</option>
+                        <option value="串口、网口">串口、网口</option>
+                    </select>
+                </div>
+                
+                <div class="button-group">
+                    <button id="recommendBtn">推荐控制器</button>
+                    <button id="resetBtn">重置参数</button>
+                </div>
+            </div>
+            
+            <div class="result-section">
+                <h2>推荐结果</h2>
+                <div id="resultsContainer">
+                    <div class="no-result">
+                        请输入参数并点击"推荐控制器"获取匹配结果
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 光源控制器选型系统 | 根据实际需求选择最合适的控制器型号及延长线/转接线</p>
+        </footer>
+    </div>
+
+    <!-- PDF预览模态框 -->
+    <div id="pdfModal" class="pdf-modal">
+        <div class="pdf-modal-content">
+            <div class="pdf-modal-header">
+                <div class="pdf-modal-title">PDF预览</div>
+                <button class="pdf-modal-close">&times;</button>
+            </div>
+            <div class="pdf-controls">
+                <div class="pdf-nav-controls">
+                    <button id="pdfPrev" class="pdf-control-btn">上一页</button>
+                    <span class="pdf-page-info">第 <span id="pdfPageNum">1</span> 页，共 <span id="pdfPageCount">0</span> 页</span>
+                    <button id="pdfNext" class="pdf-control-btn">下一页</button>
+                </div>
+                <div class="pdf-zoom-controls">
+                    <span class="pdf-zoom-info">缩放: <span id="pdfZoomLevel">100</span>%</span>
+                    <button id="pdfZoomOut" class="pdf-control-btn">缩小</button>
+                    <button id="pdfZoomIn" class="pdf-control-btn">放大</button>
+                    <button id="pdfFitWidth" class="pdf-control-btn">适合宽度</button>
+                    <button id="pdfFitPage" class="pdf-control-btn">适合页面</button>
+                </div>
+            </div>
+            <div class="pdf-canvas-container">
+                <div class="pdf-loading" id="pdfLoading">正在加载PDF...</div>
+                <canvas id="pdfCanvas" class="pdf-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 设置PDF.js worker路径
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+
+        // PDF预览相关变量
+        let pdfDoc = null;
+        let pageNum = 1;
+        let pageRendering = false;
+        let pageNumPending = null;
+        let scale = 1.0;
+        let currentPdfUrl = '';
+        
+        // PDF预览DOM元素
+        const pdfModal = document.getElementById('pdfModal');
+        const pdfCanvas = document.getElementById('pdfCanvas');
+        const pdfPrevBtn = document.getElementById('pdfPrev');
+        const pdfNextBtn = document.getElementById('pdfNext');
+        const pdfPageNum = document.getElementById('pdfPageNum');
+        const pdfPageCount = document.getElementById('pdfPageCount');
+        const pdfZoomLevel = document.getElementById('pdfZoomLevel');
+        const pdfZoomOutBtn = document.getElementById('pdfZoomOut');
+        const pdfZoomInBtn = document.getElementById('pdfZoomIn');
+        const pdfFitWidthBtn = document.getElementById('pdfFitWidth');
+        const pdfFitPageBtn = document.getElementById('pdfFitPage');
+        const pdfLoading = document.getElementById('pdfLoading');
+        const pdfModalClose = document.querySelector('.pdf-modal-close');
+
+        // URL前缀
+        const URL_PREFIX = 'https://lz.qaiu.top/parser?url=';
+        
+		const controllers = [
+			{ type: "恒压型控制器", model: "JL-XPC24V-1", rating: "A", channels: 1, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 24, channelCurrent: 0, totalCurrent: 0, communication: "无", drawing2D: "https://lbxfxx521.lanzoue.com/iMnZm36wtm7a", drawing3D: "https://lbxfxx521.lanzoue.com/iAZqW36wtv5c", manual: "https://lbxfxx521.lanzoue.com/infcQ36wtm5i" },
+			{ type: "恒压型控制器", model: "JL-STS3-9624-4", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 96, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/i1HLH37fxvlg", drawing3D: "https://lbxfxx521.lanzoue.com/i86fK37fxvni", manual: "https://lbxfxx521.lanzoue.com/imbcp37fvqwf" },
+			{ type: "恒压型控制器", model: "JL-STS3-7224-2", rating: "A", channels: 2, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 96, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iJ6wz37fxv5a", drawing3D: "https://lbxfxx521.lanzoue.com/iWFrF37fxvid", manual: "https://lbxfxx521.lanzoue.com/ixyYe37fvqpi" },
+			{ type: "恒压型控制器", model: "JL-DCV-4824-2", rating: "A", channels: 2, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 48, channelCurrent: 0, totalCurrent: 0, communication: "无", drawing2D: "https://lbxfxx521.lanzoue.com/iVmZw37fxvpa", drawing3D: "https://lbxfxx521.lanzoue.com/iKPWc37fxvsd", manual: "https://lbxfxx521.lanzoue.com/iMNEd37fvn1g" },
+			{ type: "恒压型控制器", model: "JL-DCV-4824-2-B", rating: "A", channels: 2, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 48, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/ik7Fv36wwbvg", drawing3D: "https://lbxfxx521.lanzoue.com/iijLi36wwc3e", manual: "https://lbxfxx521.lanzoue.com/iEoGr36wwcab" },
+			{ type: "恒压型控制器", model: "JL-DCV-6024-4", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 60, channelCurrent: 0, totalCurrent: 0, communication: "无", drawing2D: "https://lbxfxx521.lanzoue.com/i0ngR37fxt9c", drawing3D: "https://lbxfxx521.lanzoue.com/in91c37fxugf", manual: "https://lbxfxx521.lanzoue.com/iEoGr36wwcab" },
+			{ type: "恒压型控制器", model: "JL-DCV-6024-4-B", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 60, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/i1E1W37fxuih", drawing3D: "https://lbxfxx521.lanzoue.com/iZTpW37fxv1g", manual: "https://lbxfxx521.lanzoue.com/i41Wd37fvq2f" },
+			{ type: "恒压型控制器", model: "JL-DCV-15024-2", rating: "A", channels: 2, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "无", drawing2D: "https://lbxfxx521.lanzoue.com/iyHwo37l06eh", drawing3D: "https://lbxfxx521.lanzoue.com/igGKw37l06kd", manual: "https://lbxfxx521.lanzoue.com/ifr0v37l0gcf" },
+			{ type: "恒压型控制器", model: "JL-DCV-15024-2-B", rating: "A", channels: 2, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iqkK837l06ng", drawing3D: "https://lbxfxx521.lanzoue.com/iuNbQ37l06ud", manual: "https://lbxfxx521.lanzoue.com/iMGEA37l0g4h" },
+			{ type: "恒压型控制器", model: "JL-DCV-15024-4", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "无", drawing2D: "https://lbxfxx521.lanzoue.com/ie4MC37thkif", drawing3D: "https://lbxfxx521.lanzoue.com/idroK37thkob", manual: "https://lbxfxx521.lanzoue.com/iIJtF37thktg" },
+			{ type: "恒压型控制器", model: "JL-DCV-15024-4-B", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/isSow37thkuh", drawing3D: "https://lbxfxx521.lanzoue.com/iBm5x37thl0d", manual: "https://lbxfxx521.lanzoue.com/iYEog37thl7a" },
+			{ type: "恒压型控制器", model: "JL-DCV-6024-4-BR", rating: "C", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 60, channelCurrent: 0, totalCurrent: 0, communication: "串口、485", drawing2D: "https://lbxfxx521.lanzoue.com/imdIz37thkah", drawing3D: "https://lbxfxx521.lanzoue.com/i5ZDx37thkcj", manual: "https://lbxfxx521.lanzoue.com/iK1Qi37thkeb" },
+			{ type: "恒压型控制器", model: "JL-DCV-15024-4-BR", rating: "C", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "串口、485", drawing2D: "https://lbxfxx521.lanzoue.com/ijmcU37thl9c", drawing3D: "https://lbxfxx521.lanzoue.com/i5Hj437thlgj", manual: "https://lbxfxx521.lanzoue.com/igaIm37thljc" },
+			{ type: "恒压型控制器", model: "JL-DCV-6024-4-L", rating: "C", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 60, channelCurrent: 0, totalCurrent: 0, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iy0cN37thkfc", drawing3D: "https://lbxfxx521.lanzoue.com/ie6Xc37thkgd", manual: "https://lbxfxx521.lanzoue.com/ix2ET37thkhe" },
+			{ type: "恒压型控制器", model: "JL-DCV-15024-4-L", rating: "B", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iMEd637thlkd", drawing3D: "https://lbxfxx521.lanzoue.com/ixTf337thlle", manual: "https://lbxfxx521.lanzoue.com/iuZrO37thlpi" },
+			{ type: "恒压型控制器", model: "JL-DCV-15024-8", rating: "C", channels: 8, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "无", drawing2D: "https://example.com/drawings/JL-DCV-15024-8-2D.zip", drawing3D: "https://example.com/drawings/JL-DCV-15024-8-3D.zip", manual: "https://lbxfxx521.lanzoue.com/iotVG37tqnxc" },
+			{ type: "恒压型控制器", model: "JL-DCV-15024-8-B", rating: "A", channels: 8, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iDvnK37tqp7i", drawing3D: "https://lbxfxx521.lanzoue.com/iwNoo37tqpef", manual: "https://lbxfxx521.lanzoue.com/iFCea37tqpqh" },
+			{ type: "恒压型控制器", model: "JL-DCV-15024-8-L", rating: "A", channels: 8, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iDM6C37tqpsj24-8-L-2D.zip", drawing3D: "https://lbxfxx521.lanzoue.com/iqkqn37tqnpe", manual: "https://lbxfxx521.lanzoue.com/i23IO37tqplc" },
+			{ type: "恒压型控制器", model: "JL-DCV-15024-8-B-L", rating: "A", channels: 8, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "串口、网口", drawing2D: "https://lbxfxx521.lanzoue.com/itbDN37tqpij", drawing3D: "https://example.com/drawings/JL-DCV-15024-8-B-L-3D.zip", manual: "https://lbxfxx521.lanzoue.com/i23IO37tqplc" },
+			{ type: "恒压型控制器", model: "JL-DCV-15024-6-B", rating: "C", channels: 6, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iWO0737tqohc", drawing3D: "https://lbxfxx521.lanzoue.com/ionFO37tqoni", manual: "https://lbxfxx521.lanzoue.com/iRC2A37tqorc" },
+			{ type: "恒压型控制器", model: "JL-DCV-15024-6-L", rating: "C", channels: 6, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/itZFQ37tqosd", drawing3D: "https://lbxfxx521.lanzoue.com/ibxmw37tqp2d", manual: "https://lbxfxx521.lanzoue.com/ijaCa37tqp6h" },
+			{ type: "恒压型控制器", model: "JL-DCV-35024-16-B", rating: "C", channels: 16, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 350, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iv5Sj37tqnze", drawing3D: "https://lbxfxx521.lanzoue.com/ihze337tqoaf", manual: "https://lbxfxx521.lanzoue.com/icYda37tqoej" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V10A-1-B-CV-V1", rating: "A", channels: 1, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 10, totalCurrent: 10, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iwx6o37ttzdc", drawing3D: "https://lbxfxx521.lanzoue.com/iKEYG37ttzih", manual: "https://lbxfxx521.lanzoue.com/ii2lx37tu8kd" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V10A-2-B-CV-V1", rating: "A", channels: 2, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 5, totalCurrent: 10, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iHCpo37ttzqf", drawing3D: "https://lbxfxx521.lanzoue.com/i98a737ttzwb", manual: "https://lbxfxx521.lanzoue.com/iyPgg37tu97g" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V20A-1-B-CV-V1", rating: "A", channels: 1, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 20, totalCurrent: 20, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/is11137tu02h", drawing3D: "https://lbxfxx521.lanzoue.com/i3YO137tu05a", manual: "https://lbxfxx521.lanzoue.com/iL66u37tu9aj" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V20A-2-B-CV-V1", rating: "A", channels: 2, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 10, totalCurrent: 20, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/ifphB37tu0di", drawing3D: "https://lbxfxx521.lanzoue.com/iyz5A37tu0hc", manual: "https://lbxfxx521.lanzoue.com/i0lVq37tu9cb" },
+			{ type: "恒流型控制器", model: "JL-ACC-35V20A-1-B-CV-V1", rating: "A", channels: 1, interface: "大6芯航空母头", outputVoltage: 35, channelPower: 0, totalPower: 0, channelCurrent: 20, totalCurrent: 20, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iesCs37tu0xi", drawing3D: "https://lbxfxx521.lanzoue.com/iazUc37tu10b", manual: "https://lbxfxx521.lanzoue.com/i54UO37tu9pe" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V10A-1-L-CV-V1", rating: "A", channels: 1, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 10, totalCurrent: 10, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/isBv537ttzkj", drawing3D: "https://lbxfxx521.lanzoue.com/ibVJ737ttzod", manual: "https://lbxfxx521.lanzoue.com/i46Fr37tu8ve" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V10A-2-L-CV-V1", rating: "A", channels: 2, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 5, totalCurrent: 10, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/ijATb37ttzxc", drawing3D: "https://lbxfxx521.lanzoue.com/iWvYx37tu0oj", manual: "https://lbxfxx521.lanzoue.com/iyYbn37tu99i" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V20A-1-L-CV-V1", rating: "A", channels: 1, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 20, totalCurrent: 20, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iTWdE37tu07c", drawing3D: "https://lbxfxx521.lanzoue.com/iYz8037tu0bg", manual: "https://lbxfxx521.lanzoue.com/igkU337tu9ba" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V20A-2-L-CV-V1", rating: "A", channels: 2, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 10, totalCurrent: 20, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/i73Bl37tu0kf", drawing3D: "https://lbxfxx521.lanzoue.com/iWvYx37tu0oj", manual: "https://lbxfxx521.lanzoue.com/irtvN37tu9ed" },
+			{ type: "恒流型控制器", model: "JL-ACC-35V20A-1-L-CV-V1", rating: "A", channels: 1, interface: "大6芯航空母头", outputVoltage: 35, channelPower: 0, totalPower: 0, channelCurrent: 20, totalCurrent: 20, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iip4M37tu12d", drawing3D: "https://lbxfxx521.lanzoue.com/iu22e37tu16h", manual: "https://lbxfxx521.lanzoue.com/iM9OS37tu9uj" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V40A-4-B-L", rating: "C", channels: 4, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 10, totalCurrent: 40, communication: "串口、网口", drawing2D: "https://lbxfxx521.lanzoue.com/iXJIb37tu0pa", drawing3D: "https://lbxfxx521.lanzoue.com/iTJ4637tu0vg", manual: "https://lbxfxx521.lanzoue.com/iXCI237tu9kj" },
+			{ type: "恒流型控制器", model: "JL-ACC-48V20A-4-B-L", rating: "C", channels: 4, interface: "大6芯航空母头", outputVoltage: 48, channelPower: 0, totalPower: 0, channelCurrent: 5, totalCurrent: 20, communication: "串口、网口", drawing2D: "https://lbxfxx521.lanzoue.com/iJa3q37tu1kb", drawing3D: "https://lbxfxx521.lanzoue.com/iAhUT37tu1ta", manual: "https://lbxfxx521.lanzoue.com/ihpdL37tua5a" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V5A-1-B", rating: "A", channels: 1, interface: "小6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 5, totalCurrent: 5, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iZzy237tu1vc", drawing3D: "https://lbxfxx521.lanzoue.com/iMqgi37tu26d", manual: "https://lbxfxx521.lanzoue.com/iWgN037tu7kh" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V5A-1-L", rating: "A", channels: 1, interface: "小6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 5, totalCurrent: 5, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iNWYh37ttz3c", drawing3D: "https://example.com/drawings/JL-ACC-24V5A-1-L-3D.zip", manual: "https://lbxfxx521.lanzoue.com/iNkBU37tu7pc" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V5A-1-B-L", rating: "A", channels: 1, interface: "小6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 5, totalCurrent: 5, communication: "串口、网口", drawing2D: "https://lbxfxx521.lanzoue.com/iFBwv37tu28f", drawing3D: "https://lbxfxx521.lanzoue.com/imfP437tu2he", manual: "https://lbxfxx521.lanzoue.com/iEdTF37tua8d" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V5A-2-B", rating: "A", channels: 2, interface: "小6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 2.5, totalCurrent: 5, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/i8IMm37ttz4d", drawing3D: "https://lbxfxx521.lanzoue.com/ivcHg37ttz6f", manual: "https://lbxfxx521.lanzoue.com/i5tQH37tu85i" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V5A-2-L", rating: "A", channels: 2, interface: "小6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 2.5, totalCurrent: 5, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iQbBt37ttzcb", drawing3D: "https://example.com/drawings/JL-ACC-24V5A-2-L-3D.zip", manual: "https://lbxfxx521.lanzoue.com/igyUi37tu8dg" },
+			{ type: "恒流型控制器", model: "JL-ACC-24V5A-2-B-L", rating: "A", channels: 2, interface: "小6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 2.5, totalCurrent: 5, communication: "串口、网口", drawing2D: "https://lbxfxx521.lanzoue.com/iUQh637ttz7g", drawing3D: "https://lbxfxx521.lanzoue.com/iYCMO37ttzba", manual: "https://lbxfxx521.lanzoue.com/iggGq37tu7wj" },
+			{ type: "恒流型控制器", model: "JL-ACC-48V3A-1-B", rating: "C", channels: 1, interface: "小6芯航空母头", outputVoltage: 48, channelPower: 0, totalPower: 0, channelCurrent: 3, totalCurrent: 3, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iAGLb37tu17i", drawing3D: "https://example.com/drawings/JL-ACC-48V3A-1-B-3D.zip", manual: "https://lbxfxx521.lanzoue.com/iTEJ237tua1g" },
+			{ type: "恒流型控制器", model: "JL-ACC-48V3A-1-L", rating: "C", channels: 1, interface: "小6芯航空母头", outputVoltage: 48, channelPower: 0, totalPower: 0, channelCurrent: 3, totalCurrent: 3, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iHM3F37tu1hi", drawing3D: "https://example.com/drawings/JL-ACC-48V3A-1-L-3D.zip", manual: "https://lbxfxx521.lanzoue.com/iF2IF37tua2h" },
+			{ type: "恒流型控制器", model: "JL-ACC-48V3A-1-B-L", rating: "C", channels: 1, interface: "小6芯航空母头", outputVoltage: 48, channelPower: 0, totalPower: 0, channelCurrent: 3, totalCurrent: 3, communication: "串口、网口", drawing2D: "https://lbxfxx521.lanzoue.com/i300537tu18j", drawing3D: "https://lbxfxx521.lanzoue.com/iky9O37tu1gh", manual: "https://lbxfxx521.lanzoue.com/ilA8p37tu9ze" },
+			{ type: "恒流型控制器", model: "JL-APS4-24V4A-4-B", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 1, totalCurrent: 4, communication: "串口", drawing2D: "https://example.com/drawings/JL-APS4-24V4A-4-B-2D.zip", drawing3D: "https://example.com/drawings/JL-APS4-24V4A-4-B-3D.zip", manual: "https://example.com/manuals/JL-APS4-24V4A-4-B.pdf" },
+			{ type: "恒流型控制器", model: "JL-APS4-24V4A-4-L", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 1, totalCurrent: 4, communication: "网口", drawing2D: "https://example.com/drawings/JL-APS4-24V4A-4-L-2D.zip", drawing3D: "https://example.com/drawings/JL-APS4-24V4A-4-L-3D.zip", manual: "https://example.com/manuals/JL-APS4-24V4A-4-L.pdf" },
+			{ type: "恒流型控制器", model: "JL-APS4-24V4A-4-B-L", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 1, totalCurrent: 4, communication: "串口、网口", drawing2D: "https://example.com/drawings/JL-APS4-24V4A-4-B-L-2D.zip", drawing3D: "https://example.com/drawings/JL-APS4-24V4A-4-B-L-3D.zip", manual: "https://example.com/manuals/JL-APS4-24V4A-4-B-L.pdf" }
+		];
+        // 线缆规则（延长线和转接线）
+        const cableRules = [
+            // 延长线规则
+            { sourceInterface: "小6芯航空母头", controllerInterface: "小6芯航空母头", cable: "JLCC-6P(G)-6P(G)-(L)M-5A-GX16", cableType: "延长线", maxCurrent: 5, drawing2D: "https://lbxfxx521.lanzoue.com/idssS36x1gvg" },
+            { sourceInterface: "小6芯航空公头", controllerInterface: "小6芯航空母头", cable: "JLE-6P(G)-6P(M)-(L)M-5A-GX16", cableType: "延长线", maxCurrent: 5, drawing2D: "https://lbxfxx521.lanzoue.com/iTT0L36x1s7e" },
+            { sourceInterface: "大6芯航空公头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P(G)-6P(M)-(L)M-16A-V2", cableType: "延长线", maxCurrent: 16, drawing2D: "https://lbxfxx521.lanzoue.com/i9fT736x22tg" },
+            { sourceInterface: "大6芯航空公头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P(G)-6P(M)-(L)M-21A-V2", cableType: "延长线", maxCurrent: 21, drawing2D: "https://lbxfxx521.lanzoue.com/iRy9C36x5icd" },
+            { sourceInterface: "大6芯航空母头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P-6P-(L)M-16A", cableType: "延长线", maxCurrent: 16, drawing2D: "https://lbxfxx521.lanzoue.com/izQMj36x5igh" },
+            { sourceInterface: "大6芯航空母头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P-6P-(L)M-21A", cableType: "延长线", maxCurrent: 21, drawing2D: "https://lbxfxx521.lanzoue.com/imprj36x5ija" },
+            { sourceInterface: "1、3针", controllerInterface: "1、3针", cable: "JLE-(L)M-13-Y1", cableType: "延长线", maxCurrent: 3, drawing2D: "https://lbxfxx521.lanzoue.com/izO8P36wyy7c" },
+            
+            // 转接线规则（根据转接线适配表添加）
+            { sourceInterface: "5芯航空接头公头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P-5P-(L)M-16A", cableType: "转接线", maxCurrent: 16, drawing2D: "https://lbxfxx521.lanzoue.com/iVwa636x5ide" },
+            { sourceInterface: "5芯航空接头公头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P-5P-(L)M-21A", cableType: "转接线", maxCurrent: 21, drawing2D: "https://lbxfxx521.lanzoue.com/iUsQB36x6gmh" },
+            { sourceInterface: "小6芯航空母头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P(G)-6P(M)-(L)M-16A-V1", cableType: "转接线", maxCurrent: 16, drawing2D: "https://lbxfxx521.lanzoue.com/iYESJ36x6k4d" },
+            { sourceInterface: "小6芯航空母头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P(G)-6P(M)-(L)M-21A-V1", cableType: "转接线", maxCurrent: 21, drawing2D: "https://lbxfxx521.lanzoue.com/i9Duj36x6m5g" },
+            { sourceInterface: "大6芯航空母头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P-6P-(L)M-16A", cableType: "转接线", maxCurrent: 16, drawing2D: "https://example.com/drawings/JLCC-5P-6P-(L)M-16A.pdf" },
+            { sourceInterface: "大6芯航空母头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P-6P-(L)M-21A", cableType: "转接线", maxCurrent: 21, drawing2D: "https://example.com/drawings/JLCC-5P-6P-(L)M-21A.pdf" },
+            { sourceInterface: "小6芯航空公头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P(G)-6P(G)-GX16-(L)M-5A", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLCC-5P(G)-6P(G)-GX16-(L)M-5A.pdf" },
+            { sourceInterface: "大6芯航空公头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P(G)-6P(M)-GX16-(L)M-5A", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLCC-5P(G)-6P(M)-GX16-(L)M-5A.pdf" },
+            
+            { sourceInterface: "5芯航空接头公头", controllerInterface: "小6芯航空母头", cable: "JLCC-GX16(G)-6P(M)-(L)M-V1", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLCC-GX16(G)-6P(M)-(L)M-V1.pdf" },
+            { sourceInterface: "大6芯航空母头", controllerInterface: "小6芯航空母头", cable: "JLCC-6P(G)-6P(G)-GX16-(L)M-5A", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLCC-6P(G)-6P(G)-GX16-(L)M-5A.pdf" },
+            { sourceInterface: "大6芯航空公头", controllerInterface: "小6芯航空母头", cable: "JLCC-6P(G)-6P(M)-GX16-(L)M-5A", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLCC-6P(G)-6P(M)-GX16-(L)M-5A.pdf" },
+            { sourceInterface: "5芯航空接头母头", controllerInterface: "小6芯航空母头", cable: "JLE-6P(G)-5P(M)-(L)M-5A-GX16", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLE-6P(G)-5P(M)-(L)M-5A-GX16.pdf" },
+            
+            { sourceInterface: "5芯航空接头公头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P-5P-(L)M-16A", cableType: "转接线", maxCurrent: 16, drawing2D: "https://example.com/drawings/JLCC-6P-5P-(L)M-16A.pdf" },
+            { sourceInterface: "5芯航空接头公头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P-5P-(L)M-21A", cableType: "转接线", maxCurrent: 21, drawing2D: "https://example.com/drawings/JLCC-6P-5P-(L)M-21A.pdf" },
+            { sourceInterface: "小6芯航空母头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P(G)-6P(G)-GX16-(L)M-5A", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLCC-6P(G)-6P(G)-GX16-(L)M-5A.pdf" },
+            { sourceInterface: "小6芯航空公头", controllerInterface: "大6芯航空母头", cable: "JLE-6P(G)-6P(M)-(L)M-5A-GX16", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLE-6P(G)-6P(M)-(L)M-5A-GX16.pdf" },
+            { sourceInterface: "5芯航空接头母头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P-5P-(L)M-16A", cableType: "转接线", maxCurrent: 16, drawing2D: "https://example.com/drawings/JLCC-6P-5P-(L)M-16A.pdf" },
+            { sourceInterface: "5芯航空接头母头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P-5P-(L)M-21A", cableType: "转接线", maxCurrent: 21, drawing2D: "https://example.com/drawings/JLCC-6P-5P-(L)M-21A.pdf" }
+        ];
+        
+        // DOM元素
+        const recommendBtn = document.getElementById('recommendBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const driveTypeSelect = document.getElementById('driveType');
+        const interfaceSelect = document.getElementById('interface');
+
+        // 检查链接是否存在
+        function isLinkExist(url) {
+            return url && url.includes('lanzoue.com');
+        }
+
+        // 获取完整URL（添加前缀）
+        function getFullUrl(url) {
+            if (!url) return '';
+            return URL_PREFIX + encodeURIComponent(url);
+        }
+
+        // 根据驱动方式更新接口选项
+        function updateInterfaceOptions() {
+            const driveType = driveTypeSelect.value;
+            const currentInterface = interfaceSelect.value;
+            
+            // 清空现有选项
+            interfaceSelect.innerHTML = '';
+            
+            if (driveType === '恒压') {
+                // 恒压型控制器接口选项
+                addOption(interfaceSelect, '1、3针', '1、3针');
+                // 保存当前选择
+                if (currentInterface === '1、3针') {
+                    interfaceSelect.value = '1、3针';
+                } else {
+                    interfaceSelect.value = '1、3针';
+                }
+            } else {
+                // 恒流型控制器接口选项
+                addOption(interfaceSelect, '1、3针', '1、3针');
+                addOption(interfaceSelect, '大6芯航空母头', '大6芯航空母头');
+                addOption(interfaceSelect, '小6芯航空母头', '小6芯航空母头');
+                addOption(interfaceSelect, '大6芯航空公头', '大6芯航空公头');
+                addOption(interfaceSelect, '小6芯航空公头', '小6芯航空公头');
+                addOption(interfaceSelect, '5芯航空接头母头', '5芯航空接头母头');
+                addOption(interfaceSelect, '5芯航空接头公头', '5芯航空接头公头');
+                
+                // 尝试恢复之前的选择
+                if (['1、3针', '大6芯航空母头', '小6芯航空母头', '大6芯航空公头', '小6芯航空公头', '5芯航空接头母头', '5芯航空接头公头'].includes(currentInterface)) {
+                    interfaceSelect.value = currentInterface;
+                } else {
+                    interfaceSelect.value = '1、3针';
+                }
+            }
+        }
+
+        function addOption(select, value, text) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = text;
+            select.appendChild(option);
+        }
+
+        // 查找匹配的线缆（延长线或转接线）
+        function findMatchingCable(sourceInterface, controllerInterface, current) {
+            // 找到所有可能的匹配规则
+            const possibleRules = cableRules.filter(rule => 
+                rule.sourceInterface === sourceInterface && 
+                rule.controllerInterface === controllerInterface
+            );
+            
+            if (possibleRules.length === 0) {
+                return null;
+            }
+            
+            // 根据电流选择合适的线缆
+            // 优先选择能满足电流要求的最小规格线缆
+            const suitableRules = possibleRules.filter(rule => rule.maxCurrent >= current);
+            
+            if (suitableRules.length > 0) {
+                // 按电流容量排序，选择最小的满足要求的
+                suitableRules.sort((a, b) => a.maxCurrent - b.maxCurrent);
+                return suitableRules[0];
+            }
+            
+            // 如果没有满足电流要求的，返回最大容量的（虽然不满足，但作为参考）
+            possibleRules.sort((a, b) => b.maxCurrent - a.maxCurrent);
+            return possibleRules[0];
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            resultsContainer.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>正在计算匹配结果...</p>
+                </div>
+            `;
+        }
+
+        // PDF预览功能函数
+        function showPdfPreview(url, title) {
+            currentPdfUrl = url;
+            document.querySelector('.pdf-modal-title').textContent = title || 'PDF预览';
+            pdfModal.style.display = 'block';
+            pdfLoading.style.display = 'flex';
+            pdfCanvas.style.display = 'none';
+            
+            // 重置PDF状态
+            pageNum = 1;
+            scale = 1.0;
+            
+            // 加载PDF文档
+            const loadingTask = pdfjsLib.getDocument(url);
+            loadingTask.promise.then(function(pdf) {
+                pdfDoc = pdf;
+                pdfPageCount.textContent = pdf.numPages;
+                
+                // 初始渲染
+                renderPage(pageNum);
+            }).catch(function(error) {
+                console.error('PDF加载错误:', error);
+                pdfLoading.textContent = 'PDF加载失败，请尝试下载文件查看';
+            });
+        }
+
+        function renderPage(num) {
+            pageRendering = true;
+            pdfLoading.style.display = 'flex';
+            pdfCanvas.style.display = 'none';
+            
+            // 获取页面
+            pdfDoc.getPage(num).then(function(page) {
+                const viewport = page.getViewport({ scale: scale });
+                pdfCanvas.height = viewport.height;
+                pdfCanvas.width = viewport.width;
+                
+                // 渲染PDF页面到canvas
+                const renderContext = {
+                    canvasContext: pdfCanvas.getContext('2d'),
+                    viewport: viewport
+                };
+                const renderTask = page.render(renderContext);
+                
+                renderTask.promise.then(function() {
+                    pageRendering = false;
+                    pdfLoading.style.display = 'none';
+                    pdfCanvas.style.display = 'block';
+                    pdfPageNum.textContent = num;
+                    pdfZoomLevel.textContent = Math.round(scale * 100);
+                    
+                    // 更新按钮状态
+                    pdfPrevBtn.disabled = num <= 1;
+                    pdfNextBtn.disabled = num >= pdfDoc.numPages;
+                    
+                    // 如果有等待的页面，渲染它
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
+            });
+        }
+
+        function queueRenderPage(num) {
+            if (pageRendering) {
+                pageNumPending = num;
+            } else {
+                renderPage(num);
+            }
+        }
+
+        function onPrevPage() {
+            if (pageNum <= 1) {
+                return;
+            }
+            pageNum--;
+            queueRenderPage(pageNum);
+        }
+
+        function onNextPage() {
+            if (pageNum >= pdfDoc.numPages) {
+                return;
+            }
+            pageNum++;
+            queueRenderPage(pageNum);
+        }
+
+        function zoomOut() {
+            if (scale <= 0.5) return;
+            scale -= 0.1;
+            queueRenderPage(pageNum);
+        }
+
+        function zoomIn() {
+            if (scale >= 3.0) return;
+            scale += 0.1;
+            queueRenderPage(pageNum);
+        }
+
+        function fitWidth() {
+            if (!pdfDoc) return;
+            
+            pdfDoc.getPage(pageNum).then(function(page) {
+                const container = document.querySelector('.pdf-canvas-container');
+                const containerWidth = container.clientWidth - 40; // 减去padding
+                const pageWidth = page.getViewport({ scale: 1.0 }).width;
+                scale = containerWidth / pageWidth;
+                queueRenderPage(pageNum);
+            });
+        }
+
+        function fitPage() {
+            if (!pdfDoc) return;
+            
+            pdfDoc.getPage(pageNum).then(function(page) {
+                const container = document.querySelector('.pdf-canvas-container');
+                const containerWidth = container.clientWidth - 40; // 减去padding
+                const containerHeight = container.clientHeight - 40;
+                const pageViewport = page.getViewport({ scale: 1.0 });
+                
+                const scaleX = containerWidth / pageViewport.width;
+                const scaleY = containerHeight / pageViewport.height;
+                scale = Math.min(scaleX, scaleY);
+                
+                queueRenderPage(pageNum);
+            });
+        }
+
+        function closePdfModal() {
+            pdfModal.style.display = 'none';
+            if (pdfDoc) {
+                pdfDoc.destroy();
+                pdfDoc = null;
+            }
+        }
+
+        // 事件监听器
+        pdfPrevBtn.addEventListener('click', onPrevPage);
+        pdfNextBtn.addEventListener('click', onNextPage);
+        pdfZoomOutBtn.addEventListener('click', zoomOut);
+        pdfZoomInBtn.addEventListener('click', zoomIn);
+        pdfFitWidthBtn.addEventListener('click', fitWidth);
+        pdfFitPageBtn.addEventListener('click', fitPage);
+        pdfModalClose.addEventListener('click', closePdfModal);
+        
+        // 点击模态框外部关闭
+        window.addEventListener('click', function(event) {
+            if (event.target === pdfModal) {
+                closePdfModal();
+            }
+        });
+
+        // 计算匹配质量（用于排序多控制器方案）
+        function calculateMatchQuality(totalChannels, totalCapacity, requiredChannels, requiredCapacity) {
+            // 通道数匹配度（越接近需求越好）
+            const channelMatch = 1 - Math.abs(totalChannels - requiredChannels) / requiredChannels;
+            
+            // 容量匹配度（越接近需求越好）
+            const capacityMatch = 1 - Math.abs(totalCapacity - requiredCapacity) / requiredCapacity;
+            
+            // 综合匹配度
+            return (channelMatch + capacityMatch) / 2;
+        }
+
+        // 寻找多控制器组合解决方案 - 增强版
+        function findMultiControllerSolutions(controllers, quantity, totalRequired, perLightRequired, driveType) {
+            const solutions = [];
+            
+            // 1. 寻找多个相同控制器的组合
+            for (let i = 0; i < controllers.length; i++) {
+                const controller = controllers[i];
+                
+                // 计算需要多少个这种控制器
+                const controllerCount = Math.ceil(quantity / controller.channels);
+                
+                // 计算组合后的总通道数和总容量
+                const totalChannels = controllerCount * controller.channels;
+                let totalCapacity;
+                
+                if (driveType === '恒压') {
+                    totalCapacity = controllerCount * controller.totalPower;
+                } else {
+                    totalCapacity = controllerCount * controller.totalCurrent;
+                }
+                
+                // 检查是否满足需求（通道数和容量）
+                if (totalChannels >= quantity && totalCapacity >= totalRequired) {
+                    // 创建控制器数组（多个相同的控制器）
+                    const controllerArray = Array(controllerCount).fill(controller);
+                    
+                    solutions.push({
+                        controllers: controllerArray,
+                        totalChannels,
+                        totalCapacity,
+                        matchQuality: calculateMatchQuality(totalChannels, totalCapacity, quantity, totalRequired),
+                        solutionType: 'identical' // 标记为相同控制器组合
+                    });
+                }
+            }
+            
+            // 2. 寻找两个不同控制器的组合（原有逻辑）
+            const sortedControllers = [...controllers].sort((a, b) => b.channels - a.channels);
+            
+            for (let i = 0; i < sortedControllers.length; i++) {
+                const controller1 = sortedControllers[i];
+                
+                // 如果单个控制器已经可以满足大部分需求
+                if (controller1.channels >= quantity * 0.7) {
+                    // 寻找补充控制器
+                    for (let j = 0; j < sortedControllers.length; j++) {
+                        const controller2 = sortedControllers[j];
+                        
+                        // 确保不是同一个控制器
+                        if (controller1.model === controller2.model) continue;
+                        
+                        // 计算组合后的总通道数和总功率/电流
+                        const totalChannels = controller1.channels + controller2.channels;
+                        let totalCapacity;
+                        
+                        if (driveType === '恒压') {
+                            totalCapacity = controller1.totalPower + controller2.totalPower;
+                        } else {
+                            totalCapacity = controller1.totalCurrent + controller2.totalCurrent;
+                        }
+                        
+                        // 检查是否满足需求
+                        if (totalChannels >= quantity && totalCapacity >= totalRequired) {
+                            solutions.push({
+                                controllers: [controller1, controller2],
+                                totalChannels,
+                                totalCapacity,
+                                matchQuality: calculateMatchQuality(totalChannels, totalCapacity, quantity, totalRequired),
+                                solutionType: 'different' // 标记为不同控制器组合
+                            });
+                        }
+                    }
+                }
+            }
+            
+            // 按匹配质量排序并返回前5个最佳方案
+            return solutions.sort((a, b) => b.matchQuality - a.matchQuality).slice(0, 5);
+        }
+
+        // 推荐控制器函数
+        function recommendControllers() {
+            // 显示加载状态
+            showLoading();
+            
+            // 使用setTimeout模拟异步操作，确保UI更新
+            setTimeout(() => {
+                // 获取用户输入
+                const driveType = document.getElementById('driveType').value;
+                const voltage = parseFloat(document.getElementById('voltage').value);
+                const power = parseFloat(document.getElementById('power').value);
+                const quantity = parseInt(document.getElementById('quantity').value);
+                const sourceInterface = document.getElementById('interface').value;
+                const communication = document.getElementById('communication').value;
+                
+                // 验证输入
+                if (!voltage || voltage <= 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="no-result">
+                            <h3>输入错误</h3>
+                            <p>请输入有效的电压值（大于0）</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (!power || power <= 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="no-result">
+                            <h3>输入错误</h3>
+                            <p>请输入有效的功率值（大于0）</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (!quantity || quantity <= 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="no-result">
+                            <h3>输入错误</h3>
+                            <p>请输入有效的光源数量（大于0）</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // 计算光源电流（用于线缆选择）
+                const lightCurrent = power / voltage;
+                
+                // 筛选符合条件的控制器
+                let matchedControllers = [];
+                let multiControllerSolutions = [];
+                
+                if (driveType === "恒压") {
+                    // 计算总功率需求
+                    const totalPowerRequired = power * quantity;
+                    
+                    // 筛选恒压型控制器
+                    matchedControllers = controllers.filter(controller => {
+                        // 检查通讯方式是否匹配（如果用户选择了"不限"，则不检查通讯方式）
+                        const commMatch = communication === "不限" || 
+                                        controller.communication === communication || 
+                                        (controller.communication && controller.communication.includes(communication));
+                        
+                        // 检查是否有匹配的线缆
+                        const cableMatch = findMatchingCable(sourceInterface, controller.interface, lightCurrent) !== null;
+                        
+                        return (
+                            controller.type === "恒压型控制器" &&
+                            controller.outputVoltage === voltage &&
+                            commMatch &&
+                            cableMatch &&
+                            controller.channelPower >= power
+                        );
+                    });
+                    
+                    // 先寻找单个控制器解决方案
+                    const singleControllerSolutions = matchedControllers.filter(controller => 
+                        controller.channels >= quantity &&
+                        controller.totalPower >= totalPowerRequired
+                    );
+                    
+                    // 按推荐等级和总功率排序
+                    singleControllerSolutions.sort((a, b) => {
+                        // 先按推荐等级排序（A > B > C）
+                        const ratingOrder = { 'A': 1, 'B': 2, 'C': 3 };
+                        if (ratingOrder[a.rating] !== ratingOrder[b.rating]) {
+                            return ratingOrder[a.rating] - ratingOrder[b.rating];
+                        }
+                        // 再按总功率排序（从小到大）
+                        return a.totalPower - b.totalPower;
+                    });
+                    
+                    // 如果没有单个控制器解决方案，寻找多控制器组合
+                    if (singleControllerSolutions.length === 0) {
+                        multiControllerSolutions = findMultiControllerSolutions(
+                            matchedControllers, 
+                            quantity, 
+                            totalPowerRequired, 
+                            power,
+                            '恒压'
+                        );
+                    }
+                    
+                    // 显示结果
+                    displayResults(singleControllerSolutions, multiControllerSolutions, driveType, power, quantity, voltage, sourceInterface, lightCurrent);
+                } else if (driveType === "恒流") {
+                    // 计算光源电流
+                    const lightCurrent = power / voltage;
+                    const totalCurrentRequired = lightCurrent * quantity;
+                    
+                    // 筛选恒流型控制器
+                    matchedControllers = controllers.filter(controller => {
+                        // 检查是否有电流参数
+                        const hasCurrentParams = controller.channelCurrent !== undefined && controller.totalCurrent !== undefined;
+                        
+                        if (!hasCurrentParams) {
+                            return false; // 跳过没有电流参数的控制器
+                        }
+                        
+                        // 检查通讯方式是否匹配（如果用户选择了"不限"，则不检查通讯方式）
+                        const commMatch = communication === "不限" || 
+                                        controller.communication === communication || 
+                                        (controller.communication && controller.communication.includes(communication));
+                        
+                        // 检查是否有匹配的线缆
+                        const cableMatch = findMatchingCable(sourceInterface, controller.interface, lightCurrent) !== null;
+                        
+                        return (
+                            controller.type === "恒流型控制器" &&
+                            controller.outputVoltage === voltage &&
+                            commMatch &&
+                            cableMatch &&
+                            controller.channelCurrent >= lightCurrent
+                        );
+                    });
+                    
+                    // 先寻找单个控制器解决方案
+                    const singleControllerSolutions = matchedControllers.filter(controller => 
+                        controller.channels >= quantity &&
+                        controller.totalCurrent >= totalCurrentRequired
+                    );
+                    
+                    // 按推荐等级和总电流排序
+                    singleControllerSolutions.sort((a, b) => {
+                        // 先按推荐等级排序（A > B > C）
+                        const ratingOrder = { 'A': 1, 'B': 2, 'C': 3 };
+                        if (ratingOrder[a.rating] !== ratingOrder[b.rating]) {
+                            return ratingOrder[a.rating] - ratingOrder[b.rating];
+                        }
+                        // 再按总电流排序（从小到大）
+                        return a.totalCurrent - b.totalCurrent;
+                    });
+                    
+                    // 如果没有单个控制器解决方案，寻找多控制器组合
+                    if (singleControllerSolutions.length === 0) {
+                        multiControllerSolutions = findMultiControllerSolutions(
+                            matchedControllers, 
+                            quantity, 
+                            totalCurrentRequired, 
+                            lightCurrent,
+                            '恒流'
+                        );
+                    }
+                    
+                    // 显示结果
+                    displayResults(singleControllerSolutions, multiControllerSolutions, driveType, power, quantity, voltage, sourceInterface, lightCurrent);
+                }
+            }, 300); // 300ms延迟，确保UI更新
+        }
+
+        // 显示结果函数
+        function displayResults(singleControllers, multiControllers, driveType, power, quantity, voltage, sourceInterface, lightCurrent) {
+            resultsContainer.innerHTML = '';
+            
+            // 显示单个控制器解决方案
+            if (singleControllers.length > 0) {
+                const singleHeader = document.createElement('h3');
+                singleHeader.textContent = '单个控制器解决方案';
+                singleHeader.className = 'solution-title';
+                resultsContainer.appendChild(singleHeader);
+                
+                singleControllers.forEach(controller => {
+                    const resultCard = createControllerCard(controller, driveType, power, quantity, voltage, sourceInterface, lightCurrent);
+                    resultsContainer.appendChild(resultCard);
+                });
+            }
+            
+            // 显示多控制器组合解决方案
+            if (multiControllers.length > 0) {
+                const multiHeader = document.createElement('h3');
+                multiHeader.textContent = '多控制器组合解决方案';
+                multiHeader.className = 'solution-title';
+                resultsContainer.appendChild(multiHeader);
+                
+                multiControllers.forEach((solution, index) => {
+                    const solutionCard = createMultiControllerCard(solution, driveType, power, quantity, voltage, sourceInterface, lightCurrent, index + 1);
+                    resultsContainer.appendChild(solutionCard);
+                });
+            }
+            
+            // 如果没有任何解决方案
+            if (singleControllers.length === 0 && multiControllers.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="no-result">
+                        <h3>未找到匹配的控制器</h3>
+                        <p>请尝试调整参数或联系技术支持</p>
+                        <p>可能的原因：没有与您选择的光源接口匹配的控制器接口或线缆</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 创建多控制器组合卡片
+        function createMultiControllerCard(solution, driveType, power, quantity, voltage, sourceInterface, lightCurrent, solutionNumber) {
+            const solutionCard = document.createElement('div');
+            solutionCard.className = 'result-card multi-controller-card';
+            
+            let capacityInfo = '';
+            let matchReason = '';
+            let solutionTypeLabel = '';
+            
+            // 根据方案类型设置标签
+            if (solution.solutionType === 'identical') {
+                solutionTypeLabel = '相同控制器组合';
+            } else {
+                solutionTypeLabel = '不同控制器组合';
+            }
+            
+            if (driveType === "恒压") {
+                capacityInfo = `
+                    <div class="spec-item">
+                        <span class="spec-label">组合总功率</span>
+                        <span class="spec-value">${solution.totalCapacity} W</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">组合总通道数</span>
+                        <span class="spec-value">${solution.totalChannels}</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">控制器数量</span>
+                        <span class="spec-value">${solution.controllers.length} 个</span>
+                    </div>
+                `;
+                
+                matchReason = `<strong>匹配原因:</strong> 组合总功率(${solution.totalCapacity}W) ≥ 需求总功率(${power * quantity}W), 
+                    组合总通道数(${solution.totalChannels}) ≥ 光源数量(${quantity})`;
+            } else {
+                capacityInfo = `
+                    <div class="spec-item">
+                        <span class="spec-label">组合总电流</span>
+                        <span class="spec-value">${solution.totalCapacity.toFixed(2)} A</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">组合总通道数</span>
+                        <span class="spec-value">${solution.totalChannels}</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">控制器数量</span>
+                        <span class="spec-value">${solution.controllers.length} 个</span>
+                    </div>
+                `;
+                
+                matchReason = `<strong>匹配原因:</strong> 组合总电流(${solution.totalCapacity.toFixed(2)}A) ≥ 需求总电流(${(power/voltage * quantity).toFixed(2)}A), 
+                    组合总通道数(${solution.totalChannels}) ≥ 光源数量(${quantity})`;
+            }
+            
+            let controllersHTML = '';
+            
+            // 如果是相同控制器组合，合并显示
+            if (solution.solutionType === 'identical' && solution.controllers.length > 0) {
+                const controller = solution.controllers[0];
+                let controllerSpecs = '';
+                
+                if (driveType === "恒压") {
+                    controllerSpecs = `
+                        <div class="spec-item">
+                            <span class="spec-label">单控制器通道数</span>
+                            <span class="spec-value">${controller.channels}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">单控制器功率</span>
+                            <span class="spec-value">${controller.totalPower} W</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">所需数量</span>
+                            <span class="spec-value">${solution.controllers.length} 个</span>
+                        </div>
+                    `;
+                } else {
+                    controllerSpecs = `
+                        <div class="spec-item">
+                            <span class="spec-label">单控制器通道数</span>
+                            <span class="spec-value">${controller.channels}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">单控制器电流</span>
+                            <span class="spec-value">${controller.totalCurrent.toFixed(2)} A</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">所需数量</span>
+                            <span class="spec-value">${solution.controllers.length} 个</span>
+                        </div>
+                    `;
+                }
+                
+                const cableInfo = findMatchingCable(sourceInterface, controller.interface, lightCurrent);
+                const cableTypeClass = cableInfo.cableType === "延长线" ? "cable-type-ext" : "cable-type-adpt";
+                
+                // 下载按钮代码
+                const drawing2DButton = isLinkExist(controller.drawing2D) 
+                    ? `<a href="${getFullUrl(controller.drawing2D)}" class="download-btn" target="_blank">
+                          <span class="btn-icon download-icon"></span>
+                          <span class="btn-text">下载2D图纸</span>
+                       </a>`
+                    : `<button class="download-btn disabled" disabled>
+                          <span class="btn-icon download-icon"></span>
+                          <span class="btn-text">2D图纸暂未上传</span>
+                       </button>`;
+
+                const drawing2DPreviewButton = isLinkExist(controller.drawing2D) 
+                    ? `<button class="preview-btn" data-url="${getFullUrl(controller.drawing2D)}" data-title="${controller.model} - 2D图纸">
+                          <span class="btn-icon preview-icon"></span>
+                          <span class="btn-text">预览2D图纸</span>
+                       </button>`
+                    : `<button class="preview-btn disabled" disabled>
+                          <span class="btn-icon preview-icon"></span>
+                          <span class="btn-text">2D图纸暂未上传</span>
+                       </button>`;
+
+                const drawing3DButton = isLinkExist(controller.drawing3D) 
+                    ? `<a href="${getFullUrl(controller.drawing3D)}" class="download-btn" target="_blank">
+                          <span class="btn-icon download-icon"></span>
+                          <span class="btn-text">下载2D/3D图纸</span>
+                       </a>`
+                    : `<button class="download-btn disabled" disabled>
+                          <span class="btn-icon download-icon"></span>
+                          <span class="btn-text">2D/3D图纸暂未上传</span>
+                       </button>`;
+
+                const manualButton = isLinkExist(controller.manual) 
+                    ? `<a href="${getFullUrl(controller.manual)}" class="download-btn" target="_blank">
+                          <span class="btn-icon download-icon"></span>
+                          <span class="btn-text">下载说明书</span>
+                       </a>`
+                    : `<button class="download-btn disabled" disabled>
+                          <span class="btn-icon download-icon"></span>
+                          <span class="btn-text">说明书暂未上传</span>
+                       </button>`;
+
+                const manualPreviewButton = isLinkExist(controller.manual) 
+                    ? `<button class="preview-btn" data-url="${getFullUrl(controller.manual)}" data-title="${controller.model} - 说明书">
+                          <span class="btn-icon preview-icon"></span>
+                          <span class="btn-text">预览说明书</span>
+                       </button>`
+                    : `<button class="preview-btn disabled" disabled>
+                          <span class="btn-icon preview-icon"></span>
+                          <span class="btn-text">说明书暂未上传</span>
+                       </button>`;
+
+                const cableDrawingButton = isLinkExist(cableInfo.drawing2D) 
+                    ? `<a href="${getFullUrl(cableInfo.drawing2D)}" class="download-btn" target="_blank">
+                          <span class="btn-icon download-icon"></span>
+                          <span class="btn-text">下载${cableInfo.cableType}2D图纸</span>
+                       </a>`
+                    : `<button class="download-btn disabled" disabled>
+                          <span class="btn-icon download-icon"></span>
+                          <span class="btn-text">${cableInfo.cableType}2D图纸暂未上传</span>
+                       </button>`;
+
+                const cableDrawingPreviewButton = isLinkExist(cableInfo.drawing2D) 
+                    ? `<button class="preview-btn" data-url="${getFullUrl(cableInfo.drawing2D)}" data-title="${cableInfo.cable} - 2D图纸">
+                          <span class="btn-icon preview-icon"></span>
+                          <span class="btn-text">预览${cableInfo.cableType}2D图纸</span>
+                       </button>`
+                    : `<button class="preview-btn disabled" disabled>
+                          <span class="btn-icon preview-icon"></span>
+                          <span class="btn-text">${cableInfo.cableType}2D图纸暂未上传</span>
+                       </button>`;
+                
+                controllersHTML = `
+                    <div class="controller-in-solution">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-weight: bold; color: #2c3e50;">${controller.model} × ${solution.controllers.length}</span>
+                            <span class="rating">推荐等级: ${controller.rating}</span>
+                        </div>
+                        <div class="specs">
+                            ${controllerSpecs}
+                            <div class="spec-item">
+                                <span class="spec-label">接口类型</span>
+                                <span class="spec-value">${controller.interface}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">通讯方式</span>
+                                <span class="spec-value">${controller.communication}</span>
+                            </div>
+                        </div>
+                        <div class="cable-info" style="margin-top: 10px;">
+                            <span class="cable-type ${cableTypeClass}">${cableInfo.cableType}</span>
+                            <strong>线缆型号:</strong> ${cableInfo.cable} 
+                            ${cableInfo.maxCurrent < lightCurrent ? 
+                                `<br><span style="color: #dc3545;">警告: 光源电流(${lightCurrent.toFixed(2)}A)超过线缆最大允许电流(${cableInfo.maxCurrent}A)</span>` : 
+                                `<br><span>最大允许电流: ${cableInfo.maxCurrent}A (光源电流: ${lightCurrent.toFixed(2)}A)</span>`
+                            }
+                        </div>
+                        <div class="download-section">
+                            <div class="download-title">控制器资料下载:</div>
+                            <div class="download-buttons">
+                                ${drawing2DButton}
+                                ${drawing2DPreviewButton}
+                                ${drawing3DButton}
+                                ${manualButton}
+                                ${manualPreviewButton}
+                            </div>
+                        </div>
+                        <div class="download-section">
+                            <div class="download-title">线缆资料下载:</div>
+                            <div class="download-buttons">
+                                ${cableDrawingButton}
+                                ${cableDrawingPreviewButton}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // 不同控制器组合的显示逻辑
+                solution.controllers.forEach((controller, index) => {
+                    let controllerSpecs = '';
+                    
+                    if (driveType === "恒压") {
+                        controllerSpecs = `
+                            <div class="spec-item">
+                                <span class="spec-label">通道数量</span>
+                                <span class="spec-value">${controller.channels}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">单通道功率</span>
+                                <span class="spec-value">${controller.channelPower} W</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">总功率</span>
+                                <span class="spec-value">${controller.totalPower} W</span>
+                            </div>
+                        `;
+                    } else {
+                        controllerSpecs = `
+                            <div class="spec-item">
+                                <span class="spec-label">通道数量</span>
+                                <span class="spec-value">${controller.channels}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">单通道电流</span>
+                                <span class="spec-value">${controller.channelCurrent.toFixed(2)} A</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">总电流</span>
+                                <span class="spec-value">${controller.totalCurrent.toFixed(2)} A</span>
+                            </div>
+                        `;
+                    }
+                    
+                    const cableInfo = findMatchingCable(sourceInterface, controller.interface, lightCurrent);
+                    const cableTypeClass = cableInfo.cableType === "延长线" ? "cable-type-ext" : "cable-type-adpt";
+                    
+                    // 下载按钮代码
+                    const drawing2DButton = isLinkExist(controller.drawing2D) 
+                        ? `<a href="${getFullUrl(controller.drawing2D)}" class="download-btn" target="_blank">
+                              <span class="btn-icon download-icon"></span>
+                              <span class="btn-text">下载2D图纸</span>
+                           </a>`
+                        : `<button class="download-btn disabled" disabled>
+                              <span class="btn-icon download-icon"></span>
+                              <span class="btn-text">2D图纸暂未上传</span>
+                           </button>`;
+
+                    const drawing2DPreviewButton = isLinkExist(controller.drawing2D) 
+                        ? `<button class="preview-btn" data-url="${getFullUrl(controller.drawing2D)}" data-title="${controller.model} - 2D图纸">
+                              <span class="btn-icon preview-icon"></span>
+                              <span class="btn-text">预览2D图纸</span>
+                           </button>`
+                        : `<button class="preview-btn disabled" disabled>
+                              <span class="btn-icon preview-icon"></span>
+                              <span class="btn-text">2D图纸暂未上传</span>
+                           </button>`;
+
+                    const drawing3DButton = isLinkExist(controller.drawing3D) 
+                        ? `<a href="${getFullUrl(controller.drawing3D)}" class="download-btn" target="_blank">
+                              <span class="btn-icon download-icon"></span>
+                              <span class="btn-text">下载2D/3D图纸</span>
+                           </a>`
+                        : `<button class="download-btn disabled" disabled>
+                              <span class="btn-icon download-icon"></span>
+                              <span class="btn-text">2D/3D图纸暂未上传</span>
+                           </button>`;
+
+                    const manualButton = isLinkExist(controller.manual) 
+                        ? `<a href="${getFullUrl(controller.manual)}" class="download-btn" target="_blank">
+                              <span class="btn-icon download-icon"></span>
+                              <span class="btn-text">下载说明书</span>
+                           </a>`
+                        : `<button class="download-btn disabled" disabled>
+                              <span class="btn-icon download-icon"></span>
+                              <span class="btn-text">说明书暂未上传</span>
+                           </button>`;
+
+                    const manualPreviewButton = isLinkExist(controller.manual) 
+                        ? `<button class="preview-btn" data-url="${getFullUrl(controller.manual)}" data-title="${controller.model} - 说明书">
+                              <span class="btn-icon preview-icon"></span>
+                              <span class="btn-text">预览说明书</span>
+                           </button>`
+                        : `<button class="preview-btn disabled" disabled>
+                              <span class="btn-icon preview-icon"></span>
+                              <span class="btn-text">说明书暂未上传</span>
+                           </button>`;
+
+                    const cableDrawingButton = isLinkExist(cableInfo.drawing2D) 
+                        ? `<a href="${getFullUrl(cableInfo.drawing2D)}" class="download-btn" target="_blank">
+                              <span class="btn-icon download-icon"></span>
+                              <span class="btn-text">下载${cableInfo.cableType}2D图纸</span>
+                           </a>`
+                        : `<button class="download-btn disabled" disabled>
+                              <span class="btn-icon download-icon"></span>
+                              <span class="btn-text">${cableInfo.cableType}2D图纸暂未上传</span>
+                           </button>`;
+
+                    const cableDrawingPreviewButton = isLinkExist(cableInfo.drawing2D) 
+                        ? `<button class="preview-btn" data-url="${getFullUrl(cableInfo.drawing2D)}" data-title="${cableInfo.cable} - 2D图纸">
+                              <span class="btn-icon preview-icon"></span>
+                              <span class="btn-text">预览${cableInfo.cableType}2D图纸</span>
+                           </button>`
+                        : `<button class="preview-btn disabled" disabled>
+                              <span class="btn-icon preview-icon"></span>
+                              <span class="btn-text">${cableInfo.cableType}2D图纸暂未上传</span>
+                           </button>`;
+                    
+                    controllersHTML += `
+                        <div class="controller-in-solution">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="font-weight: bold; color: #2c3e50;">控制器 ${index + 1}: ${controller.model}</span>
+                                <span class="rating">推荐等级: ${controller.rating}</span>
+                            </div>
+                            <div class="specs">
+                                ${controllerSpecs}
+                                <div class="spec-item">
+                                    <span class="spec-label">接口类型</span>
+                                    <span class="spec-value">${controller.interface}</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">通讯方式</span>
+                                    <span class="spec-value">${controller.communication}</span>
+                                </div>
+                            </div>
+                            <div class="cable-info" style="margin-top: 10px;">
+                                <span class="cable-type ${cableTypeClass}">${cableInfo.cableType}</span>
+                                <strong>线缆型号:</strong> ${cableInfo.cable} 
+                                ${cableInfo.maxCurrent < lightCurrent ? 
+                                    `<br><span style="color: #dc3545;">警告: 光源电流(${lightCurrent.toFixed(2)}A)超过线缆最大允许电流(${cableInfo.maxCurrent}A)</span>` : 
+                                    `<br><span>最大允许电流: ${cableInfo.maxCurrent}A (光源电流: ${lightCurrent.toFixed(2)}A)</span>`
+                                }
+                            </div>
+                            <div class="download-section">
+                                <div class="download-title">控制器资料下载:</div>
+                                <div class="download-buttons">
+                                    ${drawing2DButton}
+                                    ${drawing2DPreviewButton}
+                                    ${drawing3DButton}
+                                    ${manualButton}
+                                    ${manualPreviewButton}
+                                </div>
+                            </div>
+                            <div class="download-section">
+                                <div class="download-title">线缆资料下载:</div>
+                                <div class="download-buttons">
+                                    ${cableDrawingButton}
+                                    ${cableDrawingPreviewButton}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            solutionCard.innerHTML = `
+                <div class="result-header">
+                    <span class="model">组合方案 ${solutionNumber}</span>
+                    <span class="rating multi-rating">${solutionTypeLabel}</span>
+                </div>
+                <div class="specs">
+                    ${capacityInfo}
+                </div>
+                <div class="match-reason">
+                    ${matchReason}
+                </div>
+                ${controllersHTML}
+            `;
+            
+            return solutionCard;
+        }
+
+        // 创建单个控制器卡片
+        function createControllerCard(controller, driveType, power, quantity, voltage, sourceInterface, lightCurrent) {
+            const resultCard = document.createElement('div');
+            resultCard.className = 'result-card';
+            
+            let specsHTML = '';
+            let matchReason = '';
+            const cableInfo = findMatchingCable(sourceInterface, controller.interface, lightCurrent);
+            
+            if (driveType === "恒压") {
+                specsHTML = `
+                    <div class="spec-item">
+                        <span class="spec-label">控制器类型</span>
+                        <span class="spec-value">${controller.type}</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">通道数量</span>
+                        <span class="spec-value">${controller.channels}</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">单通道功率</span>
+                        <span class="spec-value">${controller.channelPower} W</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">总功率</span>
+                        <span class="spec-value">${controller.totalPower} W</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">接口类型</span>
+                        <span class="spec-value">${controller.interface}</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">通讯方式</span>
+                        <span class="spec-value">${controller.communication}</span>
+                    </div>
+                `;
+                
+                matchReason = `<strong>匹配原因:</strong> 单通道功率(${controller.channelPower}W) ≥ 光源功率(${power}W), 
+                    总功率(${controller.totalPower}W) ≥ 需求总功率(${power * quantity}W), 
+                    通道数(${controller.channels}) ≥ 光源数量(${quantity})`;
+            } else {
+                // 计算电流参数
+                const channelCurrent = controller.channelCurrent;
+                const totalCurrent = controller.totalCurrent;
+                
+                specsHTML = `
+                    <div class="spec-item">
+                        <span class="spec-label">控制器类型</span>
+                        <span class="spec-value">${controller.type}</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">通道数量</span>
+                        <span class="spec-value">${controller.channels}</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">单通道电流</span>
+                        <span class="spec-value">${channelCurrent.toFixed(2)} A</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">总电流</span>
+                        <span class="spec-value">${totalCurrent.toFixed(2)} A</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">接口类型</span>
+                        <span class="spec-value">${controller.interface}</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">通讯方式</span>
+                        <span class="spec-value">${controller.communication}</span>
+                    </div>
+                `;
+                
+                matchReason = `<strong>匹配原因:</strong> 单通道电流(${channelCurrent.toFixed(2)}A) ≥ 光源电流(${(power/voltage).toFixed(2)}A), 
+                    总电流(${totalCurrent.toFixed(2)}A) ≥ 需求总电流(${(power/voltage * quantity).toFixed(2)}A), 
+                    通道数(${controller.channels}) ≥ 光源数量(${quantity})`;
+            }
+            
+            // 确定线缆类型样式
+            const cableTypeClass = cableInfo.cableType === "延长线" ? "cable-type-ext" : "cable-type-adpt";
+            
+            // 创建单个控制器卡片函数中的下载按钮部分
+            const drawing2DButton = isLinkExist(controller.drawing2D) 
+                ? `<a href="${getFullUrl(controller.drawing2D)}" class="download-btn" target="_blank">
+                      <span class="btn-icon download-icon"></span>
+                      <span class="btn-text">下载2D图纸</span>
+                   </a>`
+                : `<button class="download-btn disabled" disabled>
+                      <span class="btn-icon download-icon"></span>
+                      <span class="btn-text">2D图纸暂未上传</span>
+                   </button>`;
+
+            const drawing2DPreviewButton = isLinkExist(controller.drawing2D) 
+                ? `<button class="preview-btn" data-url="${getFullUrl(controller.drawing2D)}" data-title="${controller.model} - 2D图纸">
+                      <span class="btn-icon preview-icon"></span>
+                      <span class="btn-text">预览2D图纸</span>
+                   </button>`
+                : `<button class="preview-btn disabled" disabled>
+                      <span class="btn-icon preview-icon"></span>
+                      <span class="btn-text">2D图纸暂未上传</span>
+                   </button>`;
+
+            const drawing3DButton = isLinkExist(controller.drawing3D) 
+                ? `<a href="${getFullUrl(controller.drawing3D)}" class="download-btn" target="_blank">
+                      <span class="btn-icon download-icon"></span>
+                      <span class="btn-text">下载2D/3D图纸</span>
+                   </a>`
+                : `<button class="download-btn disabled" disabled>
+                      <span class="btn-icon download-icon"></span>
+                      <span class="btn-text">2D/3D图纸暂未上传</span>
+                   </button>`;
+
+            const manualButton = isLinkExist(controller.manual) 
+                ? `<a href="${getFullUrl(controller.manual)}" class="download-btn" target="_blank">
+                      <span class="btn-icon download-icon"></span>
+                      <span class="btn-text">下载说明书</span>
+                   </a>`
+                : `<button class="download-btn disabled" disabled>
+                      <span class="btn-icon download-icon"></span>
+                      <span class="btn-text">说明书暂未上传</span>
+                   </button>`;
+
+            const manualPreviewButton = isLinkExist(controller.manual) 
+                ? `<button class="preview-btn" data-url="${getFullUrl(controller.manual)}" data-title="${controller.model} - 说明书">
+                      <span class="btn-icon preview-icon"></span>
+                      <span class="btn-text">预览说明书</span>
+                   </button>`
+                : `<button class="preview-btn disabled" disabled>
+                      <span class="btn-icon preview-icon"></span>
+                      <span class="btn-text">说明书暂未上传</span>
+                   </button>`;
+
+            const cableDrawingButton = isLinkExist(cableInfo.drawing2D) 
+                ? `<a href="${getFullUrl(cableInfo.drawing2D)}" class="download-btn" target="_blank">
+                      <span class="btn-icon download-icon"></span>
+                      <span class="btn-text">下载${cableInfo.cableType}2D图纸</span>
+                   </a>`
+                : `<button class="download-btn disabled" disabled>
+                      <span class="btn-icon download-icon"></span>
+                      <span class="btn-text">${cableInfo.cableType}2D图纸暂未上传</span>
+                   </button>`;
+
+            const cableDrawingPreviewButton = isLinkExist(cableInfo.drawing2D) 
+                ? `<button class="preview-btn" data-url="${getFullUrl(cableInfo.drawing2D)}" data-title="${cableInfo.cable} - 2D图纸">
+                      <span class="btn-icon preview-icon"></span>
+                      <span class="btn-text">预览${cableInfo.cableType}2D图纸</span>
+                   </button>`
+                : `<button class="preview-btn disabled" disabled>
+                      <span class="btn-icon preview-icon"></span>
+                      <span class="btn-text">${cableInfo.cableType}2D图纸暂未上传</span>
+                   </button>`;
+            
+            resultCard.innerHTML = `
+                <div class="result-header">
+                    <span class="model">${controller.model}</span>
+                    <span class="rating">推荐等级: ${controller.rating}</span>
+                </div>
+                <div class="specs">
+                    ${specsHTML}
+                </div>
+                <div class="match-reason">
+                    ${matchReason}
+                </div>
+                <div class="cable-info">
+                    <span class="cable-type ${cableTypeClass}">${cableInfo.cableType}</span>
+                    <strong>线缆型号:</strong> ${cableInfo.cable} 
+                    ${cableInfo.maxCurrent < lightCurrent ? 
+                        `<br><span style="color: #dc3545;">警告: 光源电流(${lightCurrent.toFixed(2)}A)超过线缆最大允许电流(${cableInfo.maxCurrent}A)</span>` : 
+                        `<br><span>最大允许电流: ${cableInfo.maxCurrent}A (光源电流: ${lightCurrent.toFixed(2)}A)</span>`
+                    }
+                </div>
+                <div class="download-section">
+                    <div class="download-title">控制器资料下载:</div>
+                    <div class="download-buttons">
+                        ${drawing2DButton}
+                        ${drawing2DPreviewButton}
+                        ${drawing3DButton}
+                        ${manualButton}
+                        ${manualPreviewButton}
+                    </div>
+                </div>
+                <div class="download-section">
+                    <div class="download-title">线缆资料下载:</div>
+                    <div class="download-buttons">
+                        ${cableDrawingButton}
+                        ${cableDrawingPreviewButton}
+                    </div>
+                </div>
+            `;
+            
+            return resultCard;
+        }
+
+        // 重置表单函数
+        function resetForm() {
+            document.getElementById('driveType').value = '恒压';
+            document.getElementById('voltage').value = '24';
+            document.getElementById('power').value = '12';
+            document.getElementById('quantity').value = '1';
+            document.getElementById('communication').value = '串口';
+            
+            updateInterfaceOptions();
+            document.getElementById('interface').value = '1、3针';
+            
+            resultsContainer.innerHTML = '<div class="no-result">请输入参数并点击"推荐控制器"获取匹配结果</div>';
+        }
+
+        // 修改后的预览按钮点击事件处理 - 使用closest方法
+        document.addEventListener('click', function(e) {
+            // 使用closest方法查找最近的.preview-btn元素
+            const previewBtn = e.target.closest('.preview-btn');
+            if (previewBtn) {
+                // 检查按钮是否被禁用
+                if (previewBtn.disabled) {
+                    return;
+                }
+                
+                // 获取PDF URL和标题
+                const pdfUrl = previewBtn.dataset.url;
+                const pdfTitle = previewBtn.dataset.title || 'PDF预览';
+                
+                // 显示PDF预览
+                showPdfPreview(pdfUrl, pdfTitle);
+            }
+        });
+
+        // 事件监听
+        recommendBtn.addEventListener('click', recommendControllers);
+        resetBtn.addEventListener('click', resetForm);
+        driveTypeSelect.addEventListener('change', updateInterfaceOptions);
+
+        // 初始化
+        resetForm();
+    </script>
+</body>
+</html>
