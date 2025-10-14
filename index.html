@@ -7,7 +7,11 @@
     
     <!-- 引入PDF.js库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <!-- 引入数据文件 -->
+    <script src="controllers-data.js"></script>
+    <script src="cables-data.js"></script>
     <style>
+        /* 样式保持不变，与原始文件相同 */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -537,7 +541,78 @@
 		.download-btn.disabled, .preview-btn.disabled {
 			background: #ccc;
 			cursor: not-allowed;
-			opacity: 0.6;}
+			opacity: 0.6;
+        }
+        
+        /* 搜索区域样式 */
+        .search-section {
+            padding: 15px 20px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .search-btn {
+            background: #4a6491;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .search-btn:hover {
+            background: #2c3e50;
+        }
+        
+        .search-results-section {
+            margin-top: 20px;
+        }
+        
+        .search-result-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 4px solid #4a6491;
+        }
+        
+        .search-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .search-result-type {
+            font-size: 12px;
+            color: #7f8c8d;
+            background: #f1f1f1;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        
+        .search-result-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+		
     </style>
 </head>
 <body>
@@ -546,6 +621,15 @@
             <h1>光源控制器选型工具</h1>
             <p class="subtitle">根据光源参数快速匹配最合适的控制器型号及延长线/转接线（支持恒压（DCV）和恒流(ACC)）- 技术支持部 李哲哲</p>
         </header>
+        
+        <!-- 新增搜索区域 -->
+        <div class="search-section">
+            <div class="search-form">
+                <input type="text" id="modelSearch" class="search-input" placeholder="输入控制器或线缆型号进行模糊查询...">
+                <button id="searchBtn" class="search-btn">搜索</button>
+            </div>
+            <div class="input-hint">支持模糊查询控制器型号（如"JL-DCV-15024"）或线缆型号（如"JLCC-6P"）</div>
+        </div>
         
         <div class="content">
             <div class="input-section">
@@ -618,6 +702,14 @@
                         请输入参数并点击"推荐控制器"获取匹配结果
                     </div>
                 </div>
+                
+                <!-- 新增搜索结果显示区域 -->
+                <div id="searchResultsContainer" class="search-results-section" style="display: none;">
+                    <h2>搜索结果</h2>
+                    <div id="searchResults">
+                        <!-- 搜索结果将在这里显示 -->
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -684,87 +776,8 @@
         // URL前缀
         const URL_PREFIX = 'https://lz.qaiu.top/parser?url=';
         
-		const controllers = [
-			{ type: "恒压型控制器", model: "JL-XPC24V-1", rating: "A", channels: 1, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 24, channelCurrent: 0, totalCurrent: 0, communication: "无", drawing2D: "https://lbxfxx521.lanzoue.com/iMnZm36wtm7a", drawing3D: "https://lbxfxx521.lanzoue.com/iAZqW36wtv5c", manual: "https://lbxfxx521.lanzoue.com/infcQ36wtm5i" },
-			{ type: "恒压型控制器", model: "JL-STS3-9624-4", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 96, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/i1HLH37fxvlg", drawing3D: "https://lbxfxx521.lanzoue.com/i86fK37fxvni", manual: "https://lbxfxx521.lanzoue.com/imbcp37fvqwf" },
-			{ type: "恒压型控制器", model: "JL-STS3-7224-2", rating: "A", channels: 2, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 96, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iJ6wz37fxv5a", drawing3D: "https://lbxfxx521.lanzoue.com/iWFrF37fxvid", manual: "https://lbxfxx521.lanzoue.com/ixyYe37fvqpi" },
-			{ type: "恒压型控制器", model: "JL-DCV-4824-2", rating: "A", channels: 2, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 48, channelCurrent: 0, totalCurrent: 0, communication: "无", drawing2D: "https://lbxfxx521.lanzoue.com/iVmZw37fxvpa", drawing3D: "https://lbxfxx521.lanzoue.com/iKPWc37fxvsd", manual: "https://lbxfxx521.lanzoue.com/iMNEd37fvn1g" },
-			{ type: "恒压型控制器", model: "JL-DCV-4824-2-B", rating: "A", channels: 2, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 48, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/ik7Fv36wwbvg", drawing3D: "https://lbxfxx521.lanzoue.com/iijLi36wwc3e", manual: "https://lbxfxx521.lanzoue.com/iEoGr36wwcab" },
-			{ type: "恒压型控制器", model: "JL-DCV-6024-4", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 60, channelCurrent: 0, totalCurrent: 0, communication: "无", drawing2D: "https://lbxfxx521.lanzoue.com/i0ngR37fxt9c", drawing3D: "https://lbxfxx521.lanzoue.com/in91c37fxugf", manual: "https://lbxfxx521.lanzoue.com/iEoGr36wwcab" },
-			{ type: "恒压型控制器", model: "JL-DCV-6024-4-B", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 60, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/i1E1W37fxuih", drawing3D: "https://lbxfxx521.lanzoue.com/iZTpW37fxv1g", manual: "https://lbxfxx521.lanzoue.com/i41Wd37fvq2f" },
-			{ type: "恒压型控制器", model: "JL-DCV-15024-2", rating: "A", channels: 2, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "无", drawing2D: "https://lbxfxx521.lanzoue.com/iyHwo37l06eh", drawing3D: "https://lbxfxx521.lanzoue.com/igGKw37l06kd", manual: "https://lbxfxx521.lanzoue.com/ifr0v37l0gcf" },
-			{ type: "恒压型控制器", model: "JL-DCV-15024-2-B", rating: "A", channels: 2, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iqkK837l06ng", drawing3D: "https://lbxfxx521.lanzoue.com/iuNbQ37l06ud", manual: "https://lbxfxx521.lanzoue.com/iMGEA37l0g4h" },
-			{ type: "恒压型控制器", model: "JL-DCV-15024-4", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "无", drawing2D: "https://lbxfxx521.lanzoue.com/ie4MC37thkif", drawing3D: "https://lbxfxx521.lanzoue.com/idroK37thkob", manual: "https://lbxfxx521.lanzoue.com/iIJtF37thktg" },
-			{ type: "恒压型控制器", model: "JL-DCV-15024-4-B", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/isSow37thkuh", drawing3D: "https://lbxfxx521.lanzoue.com/iBm5x37thl0d", manual: "https://lbxfxx521.lanzoue.com/iYEog37thl7a" },
-			{ type: "恒压型控制器", model: "JL-DCV-6024-4-BR", rating: "C", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 60, channelCurrent: 0, totalCurrent: 0, communication: "串口、485", drawing2D: "https://lbxfxx521.lanzoue.com/imdIz37thkah", drawing3D: "https://lbxfxx521.lanzoue.com/i5ZDx37thkcj", manual: "https://lbxfxx521.lanzoue.com/iK1Qi37thkeb" },
-			{ type: "恒压型控制器", model: "JL-DCV-15024-4-BR", rating: "C", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "串口、485", drawing2D: "https://lbxfxx521.lanzoue.com/ijmcU37thl9c", drawing3D: "https://lbxfxx521.lanzoue.com/i5Hj437thlgj", manual: "https://lbxfxx521.lanzoue.com/igaIm37thljc" },
-			{ type: "恒压型控制器", model: "JL-DCV-6024-4-L", rating: "C", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 24, totalPower: 60, channelCurrent: 0, totalCurrent: 0, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iy0cN37thkfc", drawing3D: "https://lbxfxx521.lanzoue.com/ie6Xc37thkgd", manual: "https://lbxfxx521.lanzoue.com/ix2ET37thkhe" },
-			{ type: "恒压型控制器", model: "JL-DCV-15024-4-L", rating: "B", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iMEd637thlkd", drawing3D: "https://lbxfxx521.lanzoue.com/ixTf337thlle", manual: "https://lbxfxx521.lanzoue.com/iuZrO37thlpi" },
-			{ type: "恒压型控制器", model: "JL-DCV-15024-8", rating: "C", channels: 8, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "无", drawing2D: "https://example.com/drawings/JL-DCV-15024-8-2D.zip", drawing3D: "https://example.com/drawings/JL-DCV-15024-8-3D.zip", manual: "https://lbxfxx521.lanzoue.com/iotVG37tqnxc" },
-			{ type: "恒压型控制器", model: "JL-DCV-15024-8-B", rating: "A", channels: 8, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iDvnK37tqp7i", drawing3D: "https://lbxfxx521.lanzoue.com/iwNoo37tqpef", manual: "https://lbxfxx521.lanzoue.com/iFCea37tqpqh" },
-			{ type: "恒压型控制器", model: "JL-DCV-15024-8-L", rating: "A", channels: 8, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iDM6C37tqpsj24-8-L-2D.zip", drawing3D: "https://lbxfxx521.lanzoue.com/iqkqn37tqnpe", manual: "https://lbxfxx521.lanzoue.com/i23IO37tqplc" },
-			{ type: "恒压型控制器", model: "JL-DCV-15024-8-B-L", rating: "A", channels: 8, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "串口、网口", drawing2D: "https://lbxfxx521.lanzoue.com/itbDN37tqpij", drawing3D: "https://example.com/drawings/JL-DCV-15024-8-B-L-3D.zip", manual: "https://lbxfxx521.lanzoue.com/i23IO37tqplc" },
-			{ type: "恒压型控制器", model: "JL-DCV-15024-6-B", rating: "C", channels: 6, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iWO0737tqohc", drawing3D: "https://lbxfxx521.lanzoue.com/ionFO37tqoni", manual: "https://lbxfxx521.lanzoue.com/iRC2A37tqorc" },
-			{ type: "恒压型控制器", model: "JL-DCV-15024-6-L", rating: "C", channels: 6, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 150, channelCurrent: 0, totalCurrent: 0, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/itZFQ37tqosd", drawing3D: "https://lbxfxx521.lanzoue.com/ibxmw37tqp2d", manual: "https://lbxfxx521.lanzoue.com/ijaCa37tqp6h" },
-			{ type: "恒压型控制器", model: "JL-DCV-35024-16-B", rating: "C", channels: 16, interface: "1、3针", outputVoltage: 24, channelPower: 72, totalPower: 350, channelCurrent: 0, totalCurrent: 0, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iv5Sj37tqnze", drawing3D: "https://lbxfxx521.lanzoue.com/ihze337tqoaf", manual: "https://lbxfxx521.lanzoue.com/icYda37tqoej" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V10A-1-B-CV-V1", rating: "A", channels: 1, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 10, totalCurrent: 10, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iwx6o37ttzdc", drawing3D: "https://lbxfxx521.lanzoue.com/iKEYG37ttzih", manual: "https://lbxfxx521.lanzoue.com/ii2lx37tu8kd" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V10A-2-B-CV-V1", rating: "A", channels: 2, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 5, totalCurrent: 10, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iHCpo37ttzqf", drawing3D: "https://lbxfxx521.lanzoue.com/i98a737ttzwb", manual: "https://lbxfxx521.lanzoue.com/iyPgg37tu97g" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V20A-1-B-CV-V1", rating: "A", channels: 1, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 20, totalCurrent: 20, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/is11137tu02h", drawing3D: "https://lbxfxx521.lanzoue.com/i3YO137tu05a", manual: "https://lbxfxx521.lanzoue.com/iL66u37tu9aj" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V20A-2-B-CV-V1", rating: "A", channels: 2, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 10, totalCurrent: 20, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/ifphB37tu0di", drawing3D: "https://lbxfxx521.lanzoue.com/iyz5A37tu0hc", manual: "https://lbxfxx521.lanzoue.com/i0lVq37tu9cb" },
-			{ type: "恒流型控制器", model: "JL-ACC-35V20A-1-B-CV-V1", rating: "A", channels: 1, interface: "大6芯航空母头", outputVoltage: 35, channelPower: 0, totalPower: 0, channelCurrent: 20, totalCurrent: 20, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iesCs37tu0xi", drawing3D: "https://lbxfxx521.lanzoue.com/iazUc37tu10b", manual: "https://lbxfxx521.lanzoue.com/i54UO37tu9pe" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V10A-1-L-CV-V1", rating: "A", channels: 1, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 10, totalCurrent: 10, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/isBv537ttzkj", drawing3D: "https://lbxfxx521.lanzoue.com/ibVJ737ttzod", manual: "https://lbxfxx521.lanzoue.com/i46Fr37tu8ve" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V10A-2-L-CV-V1", rating: "A", channels: 2, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 5, totalCurrent: 10, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/ijATb37ttzxc", drawing3D: "https://lbxfxx521.lanzoue.com/iWvYx37tu0oj", manual: "https://lbxfxx521.lanzoue.com/iyYbn37tu99i" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V20A-1-L-CV-V1", rating: "A", channels: 1, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 20, totalCurrent: 20, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iTWdE37tu07c", drawing3D: "https://lbxfxx521.lanzoue.com/iYz8037tu0bg", manual: "https://lbxfxx521.lanzoue.com/igkU337tu9ba" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V20A-2-L-CV-V1", rating: "A", channels: 2, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 10, totalCurrent: 20, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/i73Bl37tu0kf", drawing3D: "https://lbxfxx521.lanzoue.com/iWvYx37tu0oj", manual: "https://lbxfxx521.lanzoue.com/irtvN37tu9ed" },
-			{ type: "恒流型控制器", model: "JL-ACC-35V20A-1-L-CV-V1", rating: "A", channels: 1, interface: "大6芯航空母头", outputVoltage: 35, channelPower: 0, totalPower: 0, channelCurrent: 20, totalCurrent: 20, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iip4M37tu12d", drawing3D: "https://lbxfxx521.lanzoue.com/iu22e37tu16h", manual: "https://lbxfxx521.lanzoue.com/iM9OS37tu9uj" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V40A-4-B-L", rating: "C", channels: 4, interface: "大6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 10, totalCurrent: 40, communication: "串口、网口", drawing2D: "https://lbxfxx521.lanzoue.com/iXJIb37tu0pa", drawing3D: "https://lbxfxx521.lanzoue.com/iTJ4637tu0vg", manual: "https://lbxfxx521.lanzoue.com/iXCI237tu9kj" },
-			{ type: "恒流型控制器", model: "JL-ACC-48V20A-4-B-L", rating: "C", channels: 4, interface: "大6芯航空母头", outputVoltage: 48, channelPower: 0, totalPower: 0, channelCurrent: 5, totalCurrent: 20, communication: "串口、网口", drawing2D: "https://lbxfxx521.lanzoue.com/iJa3q37tu1kb", drawing3D: "https://lbxfxx521.lanzoue.com/iAhUT37tu1ta", manual: "https://lbxfxx521.lanzoue.com/ihpdL37tua5a" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V5A-1-B", rating: "A", channels: 1, interface: "小6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 5, totalCurrent: 5, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iZzy237tu1vc", drawing3D: "https://lbxfxx521.lanzoue.com/iMqgi37tu26d", manual: "https://lbxfxx521.lanzoue.com/iWgN037tu7kh" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V5A-1-L", rating: "A", channels: 1, interface: "小6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 5, totalCurrent: 5, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iNWYh37ttz3c", drawing3D: "https://example.com/drawings/JL-ACC-24V5A-1-L-3D.zip", manual: "https://lbxfxx521.lanzoue.com/iNkBU37tu7pc" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V5A-1-B-L", rating: "A", channels: 1, interface: "小6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 5, totalCurrent: 5, communication: "串口、网口", drawing2D: "https://lbxfxx521.lanzoue.com/iFBwv37tu28f", drawing3D: "https://lbxfxx521.lanzoue.com/imfP437tu2he", manual: "https://lbxfxx521.lanzoue.com/iEdTF37tua8d" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V5A-2-B", rating: "A", channels: 2, interface: "小6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 2.5, totalCurrent: 5, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/i8IMm37ttz4d", drawing3D: "https://lbxfxx521.lanzoue.com/ivcHg37ttz6f", manual: "https://lbxfxx521.lanzoue.com/i5tQH37tu85i" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V5A-2-L", rating: "A", channels: 2, interface: "小6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 2.5, totalCurrent: 5, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iQbBt37ttzcb", drawing3D: "https://example.com/drawings/JL-ACC-24V5A-2-L-3D.zip", manual: "https://lbxfxx521.lanzoue.com/igyUi37tu8dg" },
-			{ type: "恒流型控制器", model: "JL-ACC-24V5A-2-B-L", rating: "A", channels: 2, interface: "小6芯航空母头", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 2.5, totalCurrent: 5, communication: "串口、网口", drawing2D: "https://lbxfxx521.lanzoue.com/iUQh637ttz7g", drawing3D: "https://lbxfxx521.lanzoue.com/iYCMO37ttzba", manual: "https://lbxfxx521.lanzoue.com/iggGq37tu7wj" },
-			{ type: "恒流型控制器", model: "JL-ACC-48V3A-1-B", rating: "C", channels: 1, interface: "小6芯航空母头", outputVoltage: 48, channelPower: 0, totalPower: 0, channelCurrent: 3, totalCurrent: 3, communication: "串口", drawing2D: "https://lbxfxx521.lanzoue.com/iAGLb37tu17i", drawing3D: "https://example.com/drawings/JL-ACC-48V3A-1-B-3D.zip", manual: "https://lbxfxx521.lanzoue.com/iTEJ237tua1g" },
-			{ type: "恒流型控制器", model: "JL-ACC-48V3A-1-L", rating: "C", channels: 1, interface: "小6芯航空母头", outputVoltage: 48, channelPower: 0, totalPower: 0, channelCurrent: 3, totalCurrent: 3, communication: "网口", drawing2D: "https://lbxfxx521.lanzoue.com/iHM3F37tu1hi", drawing3D: "https://example.com/drawings/JL-ACC-48V3A-1-L-3D.zip", manual: "https://lbxfxx521.lanzoue.com/iF2IF37tua2h" },
-			{ type: "恒流型控制器", model: "JL-ACC-48V3A-1-B-L", rating: "C", channels: 1, interface: "小6芯航空母头", outputVoltage: 48, channelPower: 0, totalPower: 0, channelCurrent: 3, totalCurrent: 3, communication: "串口、网口", drawing2D: "https://lbxfxx521.lanzoue.com/i300537tu18j", drawing3D: "https://lbxfxx521.lanzoue.com/iky9O37tu1gh", manual: "https://lbxfxx521.lanzoue.com/ilA8p37tu9ze" },
-			{ type: "恒流型控制器", model: "JL-APS4-24V4A-4-B", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 1, totalCurrent: 4, communication: "串口", drawing2D: "https://example.com/drawings/JL-APS4-24V4A-4-B-2D.zip", drawing3D: "https://example.com/drawings/JL-APS4-24V4A-4-B-3D.zip", manual: "https://example.com/manuals/JL-APS4-24V4A-4-B.pdf" },
-			{ type: "恒流型控制器", model: "JL-APS4-24V4A-4-L", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 1, totalCurrent: 4, communication: "网口", drawing2D: "https://example.com/drawings/JL-APS4-24V4A-4-L-2D.zip", drawing3D: "https://example.com/drawings/JL-APS4-24V4A-4-L-3D.zip", manual: "https://example.com/manuals/JL-APS4-24V4A-4-L.pdf" },
-			{ type: "恒流型控制器", model: "JL-APS4-24V4A-4-B-L", rating: "A", channels: 4, interface: "1、3针", outputVoltage: 24, channelPower: 0, totalPower: 0, channelCurrent: 1, totalCurrent: 4, communication: "串口、网口", drawing2D: "https://example.com/drawings/JL-APS4-24V4A-4-B-L-2D.zip", drawing3D: "https://example.com/drawings/JL-APS4-24V4A-4-B-L-3D.zip", manual: "https://example.com/manuals/JL-APS4-24V4A-4-B-L.pdf" }
-		];
-        // 线缆规则（延长线和转接线）
-        const cableRules = [
-            // 延长线规则
-            { sourceInterface: "小6芯航空母头", controllerInterface: "小6芯航空母头", cable: "JLCC-6P(G)-6P(G)-(L)M-5A-GX16", cableType: "延长线", maxCurrent: 5, drawing2D: "https://lbxfxx521.lanzoue.com/idssS36x1gvg" },
-            { sourceInterface: "小6芯航空公头", controllerInterface: "小6芯航空母头", cable: "JLE-6P(G)-6P(M)-(L)M-5A-GX16", cableType: "延长线", maxCurrent: 5, drawing2D: "https://lbxfxx521.lanzoue.com/iTT0L36x1s7e" },
-            { sourceInterface: "大6芯航空公头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P(G)-6P(M)-(L)M-16A-V2", cableType: "延长线", maxCurrent: 16, drawing2D: "https://lbxfxx521.lanzoue.com/i9fT736x22tg" },
-            { sourceInterface: "大6芯航空公头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P(G)-6P(M)-(L)M-21A-V2", cableType: "延长线", maxCurrent: 21, drawing2D: "https://lbxfxx521.lanzoue.com/iRy9C36x5icd" },
-            { sourceInterface: "大6芯航空母头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P-6P-(L)M-16A", cableType: "延长线", maxCurrent: 16, drawing2D: "https://lbxfxx521.lanzoue.com/izQMj36x5igh" },
-            { sourceInterface: "大6芯航空母头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P-6P-(L)M-21A", cableType: "延长线", maxCurrent: 21, drawing2D: "https://lbxfxx521.lanzoue.com/imprj36x5ija" },
-            { sourceInterface: "1、3针", controllerInterface: "1、3针", cable: "JLE-(L)M-13-Y1", cableType: "延长线", maxCurrent: 3, drawing2D: "https://lbxfxx521.lanzoue.com/izO8P36wyy7c" },
-            
-            // 转接线规则（根据转接线适配表添加）
-            { sourceInterface: "5芯航空接头公头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P-5P-(L)M-16A", cableType: "转接线", maxCurrent: 16, drawing2D: "https://lbxfxx521.lanzoue.com/iVwa636x5ide" },
-            { sourceInterface: "5芯航空接头公头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P-5P-(L)M-21A", cableType: "转接线", maxCurrent: 21, drawing2D: "https://lbxfxx521.lanzoue.com/iUsQB36x6gmh" },
-            { sourceInterface: "小6芯航空母头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P(G)-6P(M)-(L)M-16A-V1", cableType: "转接线", maxCurrent: 16, drawing2D: "https://lbxfxx521.lanzoue.com/iYESJ36x6k4d" },
-            { sourceInterface: "小6芯航空母头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P(G)-6P(M)-(L)M-21A-V1", cableType: "转接线", maxCurrent: 21, drawing2D: "https://lbxfxx521.lanzoue.com/i9Duj36x6m5g" },
-            { sourceInterface: "大6芯航空母头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P-6P-(L)M-16A", cableType: "转接线", maxCurrent: 16, drawing2D: "https://example.com/drawings/JLCC-5P-6P-(L)M-16A.pdf" },
-            { sourceInterface: "大6芯航空母头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P-6P-(L)M-21A", cableType: "转接线", maxCurrent: 21, drawing2D: "https://example.com/drawings/JLCC-5P-6P-(L)M-21A.pdf" },
-            { sourceInterface: "小6芯航空公头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P(G)-6P(G)-GX16-(L)M-5A", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLCC-5P(G)-6P(G)-GX16-(L)M-5A.pdf" },
-            { sourceInterface: "大6芯航空公头", controllerInterface: "5芯航空接头母头", cable: "JLCC-5P(G)-6P(M)-GX16-(L)M-5A", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLCC-5P(G)-6P(M)-GX16-(L)M-5A.pdf" },
-            
-            { sourceInterface: "5芯航空接头公头", controllerInterface: "小6芯航空母头", cable: "JLCC-GX16(G)-6P(M)-(L)M-V1", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLCC-GX16(G)-6P(M)-(L)M-V1.pdf" },
-            { sourceInterface: "大6芯航空母头", controllerInterface: "小6芯航空母头", cable: "JLCC-6P(G)-6P(G)-GX16-(L)M-5A", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLCC-6P(G)-6P(G)-GX16-(L)M-5A.pdf" },
-            { sourceInterface: "大6芯航空公头", controllerInterface: "小6芯航空母头", cable: "JLCC-6P(G)-6P(M)-GX16-(L)M-5A", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLCC-6P(G)-6P(M)-GX16-(L)M-5A.pdf" },
-            { sourceInterface: "5芯航空接头母头", controllerInterface: "小6芯航空母头", cable: "JLE-6P(G)-5P(M)-(L)M-5A-GX16", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLE-6P(G)-5P(M)-(L)M-5A-GX16.pdf" },
-            
-            { sourceInterface: "5芯航空接头公头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P-5P-(L)M-16A", cableType: "转接线", maxCurrent: 16, drawing2D: "https://example.com/drawings/JLCC-6P-5P-(L)M-16A.pdf" },
-            { sourceInterface: "5芯航空接头公头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P-5P-(L)M-21A", cableType: "转接线", maxCurrent: 21, drawing2D: "https://example.com/drawings/JLCC-6P-5P-(L)M-21A.pdf" },
-            { sourceInterface: "小6芯航空母头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P(G)-6P(G)-GX16-(L)M-5A", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLCC-6P(G)-6P(G)-GX16-(L)M-5A.pdf" },
-            { sourceInterface: "小6芯航空公头", controllerInterface: "大6芯航空母头", cable: "JLE-6P(G)-6P(M)-(L)M-5A-GX16", cableType: "转接线", maxCurrent: 5, drawing2D: "https://example.com/drawings/JLE-6P(G)-6P(M)-(L)M-5A-GX16.pdf" },
-            { sourceInterface: "5芯航空接头母头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P-5P-(L)M-16A", cableType: "转接线", maxCurrent: 16, drawing2D: "https://example.com/drawings/JLCC-6P-5P-(L)M-16A.pdf" },
-            { sourceInterface: "5芯航空接头母头", controllerInterface: "大6芯航空母头", cable: "JLCC-6P-5P-(L)M-21A", cableType: "转接线", maxCurrent: 21, drawing2D: "https://example.com/drawings/JLCC-6P-5P-(L)M-21A.pdf" }
-        ];
+        // 使用外部数据文件中的控制器和线缆数据
+        // 注意：controllers-data.js 和 cables-data.js 需要在主脚本之前引入
         
         // DOM元素
         const recommendBtn = document.getElementById('recommendBtn');
@@ -772,6 +785,12 @@
         const resultsContainer = document.getElementById('resultsContainer');
         const driveTypeSelect = document.getElementById('driveType');
         const interfaceSelect = document.getElementById('interface');
+        
+        // 新增搜索相关DOM元素
+        const modelSearch = document.getElementById('modelSearch');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchResultsContainer = document.getElementById('searchResultsContainer');
+        const searchResults = document.getElementById('searchResults');
 
         // 检查链接是否存在
         function isLinkExist(url) {
@@ -782,6 +801,291 @@
         function getFullUrl(url) {
             if (!url) return '';
             return URL_PREFIX + encodeURIComponent(url);
+        }
+
+        // 模糊搜索函数
+        function searchModels(keyword) {
+            if (!keyword || keyword.trim() === '') {
+                return {
+                    controllers: [],
+                    cables: []
+                };
+            }
+            
+            const searchTerm = keyword.toLowerCase().trim();
+            
+            // 搜索控制器
+            const matchedControllers = controllers.filter(controller => 
+                controller.model.toLowerCase().includes(searchTerm) || 
+                controller.type.toLowerCase().includes(searchTerm)
+            );
+            
+            // 搜索线缆
+            const matchedCables = cableRules.filter(cable => 
+                cable.cable.toLowerCase().includes(searchTerm) ||
+                cable.cableType.toLowerCase().includes(searchTerm) ||
+                cable.sourceInterface.toLowerCase().includes(searchTerm) ||
+                cable.controllerInterface.toLowerCase().includes(searchTerm)
+            );
+            
+            return {
+                controllers: matchedControllers,
+                cables: matchedCables
+            };
+        }
+
+        // 显示搜索结果
+        function displaySearchResults(results) {
+            searchResults.innerHTML = '';
+            
+            if (results.controllers.length === 0 && results.cables.length === 0) {
+                searchResults.innerHTML = `
+                    <div class="no-result">
+                        <h3>未找到匹配的型号</h3>
+                        <p>请尝试使用其他关键词搜索</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 显示控制器搜索结果
+            if (results.controllers.length > 0) {
+                const controllerHeader = document.createElement('h3');
+                controllerHeader.textContent = '控制器';
+                controllerHeader.className = 'solution-title';
+                searchResults.appendChild(controllerHeader);
+                
+                results.controllers.forEach(controller => {
+                    const resultItem = createSearchResultItem(controller, 'controller');
+                    searchResults.appendChild(resultItem);
+                });
+            }
+            
+            // 显示线缆搜索结果
+            if (results.cables.length > 0) {
+                const cableHeader = document.createElement('h3');
+                cableHeader.textContent = '线缆';
+                cableHeader.className = 'solution-title';
+                searchResults.appendChild(cableHeader);
+                
+                results.cables.forEach(cable => {
+                    const resultItem = createSearchResultItem(cable, 'cable');
+                    searchResults.appendChild(resultItem);
+                });
+            }
+            
+            // 显示搜索结果区域
+            searchResultsContainer.style.display = 'block';
+        }
+
+        // 创建搜索结果项
+        function createSearchResultItem(item, type) {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'search-result-item';
+            
+            if (type === 'controller') {
+                const controller = item;
+                
+                // 获取控制器对应的线缆
+                const matchingCables = cableRules.filter(cable => 
+                    cable.controllerInterface === controller.interface
+                );
+                
+                let cableInfoHTML = '';
+                if (matchingCables.length > 0) {
+                    cableInfoHTML = `
+                        <div class="cable-info" style="margin-top: 10px;">
+                            <strong>兼容线缆:</strong>
+                            <ul style="margin-top: 5px; padding-left: 20px;">
+                                ${matchingCables.map(cable => 
+                                    `<li>${cable.cable} (${cable.cableType}, 最大电流: ${cable.maxCurrent}A)</li>`
+                                ).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                resultItem.innerHTML = `
+                    <div class="search-result-header">
+                        <span class="search-result-title">${controller.model}</span>
+                        <span class="search-result-type">${controller.type}</span>
+                    </div>
+                    <div class="specs">
+                        <div class="spec-item">
+                            <span class="spec-label">通道数量</span>
+                            <span class="spec-value">${controller.channels}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">输出电压</span>
+                            <span class="spec-value">${controller.outputVoltage} V</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">接口类型</span>
+                            <span class="spec-value">${controller.interface}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">通讯方式</span>
+                            <span class="spec-value">${controller.communication}</span>
+                        </div>
+                        ${controller.channelPower > 0 ? `
+                        <div class="spec-item">
+                            <span class="spec-label">单通道功率</span>
+                            <span class="spec-value">${controller.channelPower} W</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">总功率</span>
+                            <span class="spec-value">${controller.totalPower} W</span>
+                        </div>
+                        ` : ''}
+                        ${controller.channelCurrent > 0 ? `
+                        <div class="spec-item">
+                            <span class="spec-label">单通道电流</span>
+                            <span class="spec-value">${controller.channelCurrent} A</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">总电流</span>
+                            <span class="spec-value">${controller.totalCurrent} A</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    ${cableInfoHTML}
+                    <div class="download-section">
+                        <div class="download-title">资料下载:</div>
+                        <div class="download-buttons">
+                            ${isLinkExist(controller.drawing2D) ? 
+                                `<a href="${getFullUrl(controller.drawing2D)}" class="download-btn" target="_blank">
+                                    <span class="btn-icon download-icon"></span>
+                                    <span class="btn-text">下载2D图纸</span>
+                                </a>` : 
+                                `<button class="download-btn disabled" disabled>
+                                    <span class="btn-icon download-icon"></span>
+                                    <span class="btn-text">2D图纸暂未上传</span>
+                                </button>`
+                            }
+                            ${isLinkExist(controller.drawing2D) ? 
+                                `<button class="preview-btn" data-url="${getFullUrl(controller.drawing2D)}" data-title="${controller.model} - 2D图纸">
+                                    <span class="btn-icon preview-icon"></span>
+                                    <span class="btn-text">预览2D图纸</span>
+                                </button>` : 
+                                `<button class="preview-btn disabled" disabled>
+                                    <span class="btn-icon preview-icon"></span>
+                                    <span class="btn-text">2D图纸暂未上传</span>
+                                </button>`
+                            }
+                            ${isLinkExist(controller.drawing3D) ? 
+                                `<a href="${getFullUrl(controller.drawing3D)}" class="download-btn" target="_blank">
+                                    <span class="btn-icon download-icon"></span>
+                                    <span class="btn-text">下载2D/3D图纸</span>
+                                </a>` : 
+                                `<button class="download-btn disabled" disabled>
+                                    <span class="btn-icon download-icon"></span>
+                                    <span class="btn-text">2D/3D图纸暂未上传</span>
+                                </button>`
+                            }
+                            ${isLinkExist(controller.manual) ? 
+                                `<a href="${getFullUrl(controller.manual)}" class="download-btn" target="_blank">
+                                    <span class="btn-icon download-icon"></span>
+                                    <span class="btn-text">下载说明书</span>
+                                </a>` : 
+                                `<button class="download-btn disabled" disabled>
+                                    <span class="btn-icon download-icon"></span>
+                                    <span class="btn-text">说明书暂未上传</span>
+                                </button>`
+                            }
+                            ${isLinkExist(controller.manual) ? 
+                                `<button class="preview-btn" data-url="${getFullUrl(controller.manual)}" data-title="${controller.model} - 说明书">
+                                    <span class="btn-icon preview-icon"></span>
+                                    <span class="btn-text">预览说明书</span>
+                                </button>` : 
+                                `<button class="preview-btn disabled" disabled>
+                                    <span class="btn-icon preview-icon"></span>
+                                    <span class="btn-text">说明书暂未上传</span>
+                                </button>`
+                            }
+                        </div>
+                    </div>
+                `;
+            } else {
+                // 线缆搜索结果
+                const cable = item;
+                const cableTypeClass = cable.cableType === "延长线" ? "cable-type-ext" : "cable-type-adpt";
+                
+                resultItem.innerHTML = `
+                    <div class="search-result-header">
+                        <span class="search-result-title">${cable.cable}</span>
+                        <span class="search-result-type">${cable.cableType}</span>
+                    </div>
+                    <div class="specs">
+                        <div class="spec-item">
+                            <span class="spec-label">光源接口</span>
+                            <span class="spec-value">${cable.sourceInterface}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">控制器接口</span>
+                            <span class="spec-value">${cable.controllerInterface}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">最大电流</span>
+                            <span class="spec-value">${cable.maxCurrent} A</span>
+                        </div>
+                    </div>
+                    <div class="download-section">
+                        <div class="download-title">资料下载:</div>
+                        <div class="download-buttons">
+                            ${isLinkExist(cable.drawing2D) ? 
+                                `<a href="${getFullUrl(cable.drawing2D)}" class="download-btn" target="_blank">
+                                    <span class="btn-icon download-icon"></span>
+                                    <span class="btn-text">下载2D图纸</span>
+                                </a>` : 
+                                `<button class="download-btn disabled" disabled>
+                                    <span class="btn-icon download-icon"></span>
+                                    <span class="btn-text">2D图纸暂未上传</span>
+                                </button>`
+                            }
+                            ${isLinkExist(cable.drawing2D) ? 
+                                `<button class="preview-btn" data-url="${getFullUrl(cable.drawing2D)}" data-title="${cable.cable} - 2D图纸">
+                                    <span class="btn-icon preview-icon"></span>
+                                    <span class="btn-text">预览2D图纸</span>
+                                </button>` : 
+                                `<button class="preview-btn disabled" disabled>
+                                    <span class="btn-icon preview-icon"></span>
+                                    <span class="btn-text">2D图纸暂未上传</span>
+                                </button>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return resultItem;
+        }
+
+        // 执行搜索
+        function performSearch() {
+            const keyword = modelSearch.value;
+            
+            if (!keyword || keyword.trim() === '') {
+                alert('请输入搜索关键词');
+                return;
+            }
+            
+            // 隐藏推荐结果，显示搜索结果
+            resultsContainer.style.display = 'none';
+            searchResultsContainer.style.display = 'block';
+            
+            // 显示加载状态
+            searchResults.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>正在搜索...</p>
+                </div>
+            `;
+            
+            // 使用setTimeout模拟异步搜索
+            setTimeout(() => {
+                const results = searchModels(keyword);
+                displaySearchResults(results);
+            }, 300);
         }
 
         // 根据驱动方式更新接口选项
@@ -1112,6 +1416,10 @@
         function recommendControllers() {
             // 显示加载状态
             showLoading();
+            
+            // 隐藏搜索结果，显示推荐结果
+            searchResultsContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
             
             // 使用setTimeout模拟异步操作，确保UI更新
             setTimeout(() => {
@@ -1906,11 +2214,14 @@
             document.getElementById('power').value = '12';
             document.getElementById('quantity').value = '1';
             document.getElementById('communication').value = '串口';
+            modelSearch.value = '';
             
             updateInterfaceOptions();
             document.getElementById('interface').value = '1、3针';
             
             resultsContainer.innerHTML = '<div class="no-result">请输入参数并点击"推荐控制器"获取匹配结果</div>';
+            searchResultsContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
         }
 
         // 修改后的预览按钮点击事件处理 - 使用closest方法
@@ -1936,9 +2247,18 @@
         recommendBtn.addEventListener('click', recommendControllers);
         resetBtn.addEventListener('click', resetForm);
         driveTypeSelect.addEventListener('change', updateInterfaceOptions);
+        
+        // 新增搜索相关事件监听
+        searchBtn.addEventListener('click', performSearch);
+        modelSearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
 
         // 初始化
         resetForm();
+
     </script>
 </body>
 </html>
