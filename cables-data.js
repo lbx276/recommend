@@ -123,10 +123,10 @@ const cableRules = [
       {
         "sourceInterface": "5芯航空接头公头",
         "controllerInterface": "小6芯航空母头",
-        "cable": "JLCC-GX16(G)-6P(M)-(L)M-V1",
+        "cable": "JLE-6P(G)-5P(M)-(L)M-5A-GX16",
         "cableType": "转接线",
         "maxCurrent": 5,
-        "drawing2D": "https://lbxfxx521.lanzoue.com/ia1Eb38bx9qb"
+        "drawing2D": "https://lbxfxx521.lanzoue.com/imBuA38bx65c"
       },
       {
         "sourceInterface": "大6芯航空母头",
@@ -143,14 +143,6 @@ const cableRules = [
         "cableType": "转接线",
         "maxCurrent": 5,
         "drawing2D": "https://lbxfxx521.lanzoue.com/iZE0338bx84d"
-      },
-      {
-        "sourceInterface": "5芯航空接头母头",
-        "controllerInterface": "小6芯航空母头",
-        "cable": "JLE-6P(G)-5P(M)-(L)M-5A-GX16",
-        "cableType": "转接线",
-        "maxCurrent": 5,
-        "drawing2D": "https://lbxfxx521.lanzoue.com/imBuA38bx65c"
       },
       {
         "sourceInterface": "5芯航空接头公头",
@@ -184,20 +176,5 @@ const cableRules = [
         "maxCurrent": 5,
         "drawing2D": "https://lbxfxx521.lanzoue.com/iqn2s38bwryb"
       },
-      {
-        "sourceInterface": "5芯航空接头母头",
-        "controllerInterface": "大6芯航空母头",
-        "cable": "JLCC-6P-5P-(L)M-16A",
-        "cableType": "转接线",
-        "maxCurrent": 16,
-        "drawing2D": "https://lbxfxx521.lanzoue.com/isqPe38bwx0d"
-      },
-      {
-        "sourceInterface": "5芯航空接头母头",
-        "controllerInterface": "大6芯航空母头",
-        "cable": "JLCC-6P-5P-(L)M-21A",
-        "cableType": "转接线",
-        "maxCurrent": 21,
-        "drawing2D": "https://lbxfxx521.lanzoue.com/im5rr38bwuza"
-      }
+
     ];
