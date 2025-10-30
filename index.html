@@ -618,7 +618,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>光源控制器选型工具</h1>
+            <h1>苏州嘉励光源控制器选型工具</h1>
             <p class="subtitle">根据光源参数快速匹配最合适的控制器型号及延长线/转接线【支持恒压(DCV)和恒流(ACC)】- 苏州嘉励</p>
         </header>
         
@@ -671,7 +671,7 @@
                         <option value="小6芯航空母头">小6芯航空母头</option>
                         <option value="大6芯航空公头">大6芯航空公头</option>
                         <option value="小6芯航空公头">小6芯航空公头</option>
-                        <option value="5芯航空接头母头">5芯航空接头母头</option>
+
                         <option value="5芯航空接头公头">5芯航空接头公头</option>
                     </select>
                 </div>
@@ -714,7 +714,7 @@
         </div>
         
         <footer>
-            <p>© 2025 光源控制器选型系统 | 根据实际需求选择最合适的控制器型号及延长线/转接线</p>
+            <p>© 2025 光源控制器选型系统 | 苏州嘉励自动化科技有限公司</p>
         </footer>
     </div>
 
@@ -1112,11 +1112,11 @@
                 addOption(interfaceSelect, '小6芯航空母头', '小6芯航空母头');
                 addOption(interfaceSelect, '大6芯航空公头', '大6芯航空公头');
                 addOption(interfaceSelect, '小6芯航空公头', '小6芯航空公头');
-                addOption(interfaceSelect, '5芯航空接头母头', '5芯航空接头母头');
+ 
                 addOption(interfaceSelect, '5芯航空接头公头', '5芯航空接头公头');
                 
                 // 尝试恢复之前的选择
-                if (['1、3针', '大6芯航空母头', '小6芯航空母头', '大6芯航空公头', '小6芯航空公头', '5芯航空接头母头', '5芯航空接头公头'].includes(currentInterface)) {
+                if (['1、3针', '大6芯航空母头', '小6芯航空母头', '大6芯航空公头', '小6芯航空公头',  '5芯航空接头公头'].includes(currentInterface)) {
                     interfaceSelect.value = currentInterface;
                 } else {
                     interfaceSelect.value = '1、3针';
