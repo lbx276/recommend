@@ -38,13 +38,34 @@
         header {
             background: linear-gradient(135deg, #2c3e50, #4a6491);
             color: white;
-            padding: 25px;
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        
+        .logo-container {
+            position: absolute;
+            left: 25px;
+            top: 20%;
+            transform: translateY(-50%);
+        }
+        
+        .logo {
+            height: 25px;
+        }
+        
+        .header-text {
             text-align: center;
+            flex: 1;
+            padding: 0 80px; /* 为logo留出空间 */
         }
         
         h1 {
             font-size: 28px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .subtitle {
@@ -351,6 +372,22 @@
             .download-btn, .preview-btn {
                 width: 100%;
             }
+            
+            header {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+            
+            .logo-container {
+                position: static;
+                transform: none;
+                margin-bottom: 10px;
+            }
+            
+            .header-text {
+                padding: 0;
+            }
         }
         
         /* 新增样式：优化用户体验 */
@@ -618,8 +655,14 @@
 <body>
     <div class="container">
         <header>
-            <h1>光源控制器选型工具</h1>
-            <p class="subtitle">根据光源参数快速匹配最合适的控制器型号及延长线/转接线（支持恒压（DCV）和恒流(ACC)）- 技术支持部 李哲哲</p>
+            <div class="logo-container">
+                <!-- 这里添加苏州嘉励的logo -->
+                <img src="./嘉励Logo-纵向-浅蓝.png?text=苏州嘉励" alt="苏州嘉励自动化科技有限公司" class="logo">
+            </div>
+            <div class="header-text">
+                <h1>苏州嘉励光源控制器选型工具</h1>
+                <p class="subtitle">根据光源参数快速匹配最合适的控制器型号及延长线/转接线【支持恒压(DCV)和恒流(ACC)】- 苏州嘉励</p>
+            </div>
         </header>
         
         <!-- 新增搜索区域 -->
@@ -671,6 +714,7 @@
                         <option value="小6芯航空母头">小6芯航空母头</option>
                         <option value="大6芯航空公头">大6芯航空公头</option>
                         <option value="小6芯航空公头">小6芯航空公头</option>
+
                         <option value="5芯航空接头公头">5芯航空接头公头</option>
                     </select>
                 </div>
@@ -713,7 +757,7 @@
         </div>
         
         <footer>
-            <p>© 2025 光源控制器选型系统 | 根据实际需求选择最合适的控制器型号及延长线/转接线</p>
+            <p>© 2025 光源控制器选型系统 | 苏州嘉励自动化科技有限公司</p>
         </footer>
     </div>
 
@@ -1111,10 +1155,11 @@
                 addOption(interfaceSelect, '小6芯航空母头', '小6芯航空母头');
                 addOption(interfaceSelect, '大6芯航空公头', '大6芯航空公头');
                 addOption(interfaceSelect, '小6芯航空公头', '小6芯航空公头');
+ 
                 addOption(interfaceSelect, '5芯航空接头公头', '5芯航空接头公头');
                 
                 // 尝试恢复之前的选择
-                if (['1、3针', '大6芯航空母头', '小6芯航空母头', '大6芯航空公头', '小6芯航空公头', '5芯航空接头公头'].includes(currentInterface)) {
+                if (['1、3针', '大6芯航空母头', '小6芯航空母头', '大6芯航空公头', '小6芯航空公头',  '5芯航空接头公头'].includes(currentInterface)) {
                     interfaceSelect.value = currentInterface;
                 } else {
                     interfaceSelect.value = '1、3针';
