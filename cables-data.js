@@ -19,18 +19,18 @@ const cableRules = [
       {
         "sourceInterface": "大6芯航空公头",
         "controllerInterface": "大6芯航空母头",
-        "cable": "JLCC-6P(G)-6P(M)-(L)M-16A-V2",
+        "cable": "JLCC-6P(G)-6P(M)-(L)M-ACC-16A",
         "cableType": "延长线",
         "maxCurrent": 16,
-        "drawing2D": "https://lbxfxx521.lanzoue.com/i9fT736x22tg"
+        "drawing2D": "https://lbxfxx521.lanzoue.com/ihYBp3cyxvod"
       },
       {
         "sourceInterface": "大6芯航空公头",
         "controllerInterface": "大6芯航空母头",
-        "cable": "JLCC-6P(G)-6P(M)-(L)M-21A-V2",
+        "cable": "JLCC-6P(G)-6P(M)-(L)M-ACC-21A",
         "cableType": "延长线",
         "maxCurrent": 21,
-        "drawing2D": "https://lbxfxx521.lanzoue.com/iRy9C36x5icd"
+        "drawing2D": "https://lbxfxx521.lanzoue.com/i7Eu43cyxx5g"
       },
       {
         "sourceInterface": "大6芯航空母头",
