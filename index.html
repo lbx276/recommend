@@ -11,7 +11,6 @@
     <script src="controllers-data.js"></script>
     <script src="cables-data.js"></script>
     <style>
-        /* 样式保持不变，与原始文件相同 */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -398,7 +397,6 @@
             }
         }
         
-        /* 新增样式：优化用户体验 */
         .input-hint {
             font-size: 12px;
             color: #7f8c8d;
@@ -447,7 +445,7 @@
             border-bottom: none;
         }
         
-              /* PDF预览模态框样式 - 全屏优化 */
+        /* PDF预览模态框样式 - 全屏优化 */
         .pdf-modal {
             display: none;
             position: fixed;
@@ -657,6 +655,34 @@
             font-weight: bold;
             color: #2c3e50;
         }
+        
+        /* 接口预览图片样式 */
+        .interface-preview {
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .preview-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f9f9f9;
+            border-radius: 5px;
+            padding: 15px;
+            min-height: 150px;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 5px;
+            display: block;
+        }
 		
     </style>
 </head>
@@ -664,8 +690,7 @@
     <div class="container">
         <header>
             <div class="logo-container">
-                <!-- 这里添加苏州嘉励的logo -->
-                <img src="./嘉励Logo-纵向-浅蓝.png?text=苏州嘉励" alt="苏州嘉励自动化科技有限公司" class="logo">
+                <img src="pic/嘉励Logo-纵向-浅蓝.png" alt="苏州嘉励自动化科技有限公司" class="logo">
             </div>
             <div class="header-text">
                 <h1>苏州嘉励光源控制器选型工具</h1>
@@ -725,6 +750,12 @@
 
                         <option value="5芯航空接头公头">5芯航空接头公头</option>
                     </select>
+                    <!-- 接口预览图片区域 -->
+                    <div id="interfacePreview" class="interface-preview" style="display: none;">
+                        <div class="preview-image-container">
+                            <img id="interfacePreviewImg" src="" alt="接口预览图" class="preview-image">
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -754,7 +785,7 @@
                     </div>
                 </div>
                 
-                <!-- 新增搜索结果显示区域 -->
+
                 <div id="searchResultsContainer" class="search-results-section" style="display: none;">
                     <h2>搜索结果</h2>
                     <div id="searchResults">
@@ -827,15 +858,41 @@
         // URL前缀
         const URL_PREFIX = 'https://lz.qaiu.top/parser?url=';
         
-        // 使用外部数据文件中的控制器和线缆数据
-        // 注意：controllers-data.js 和 cables-data.js 需要在主脚本之前引入
-        
         // DOM元素
         const recommendBtn = document.getElementById('recommendBtn');
         const resetBtn = document.getElementById('resetBtn');
         const resultsContainer = document.getElementById('resultsContainer');
         const driveTypeSelect = document.getElementById('driveType');
         const interfaceSelect = document.getElementById('interface');
+        const interfacePreview = document.getElementById('interfacePreview');
+        const interfacePreviewImg = document.getElementById('interfacePreviewImg');
+        
+        // 接口类型与图片的映射关系
+        const interfaceImageMap = {
+            '1、3针': 'pic/1、3针.png',
+            '大6芯航空母头': 'pic/大6芯航空母头.png',
+            '小6芯航空母头': 'pic/小6芯航空母头.png',
+            '大6芯航空公头': 'pic/大6芯航空公头.png',
+            '小6芯航空公头': 'pic/小6芯航空公头.png',
+            '5芯航空接头公头': 'pic/5芯航空接头公头.png'
+        };
+        
+        // 图片预加载缓存
+        const imageCache = {};
+        
+        // 预加载所有接口图片
+        function preloadInterfaceImages() {
+            Object.values(interfaceImageMap).forEach(imagePath => {
+                if (imagePath && !imageCache[imagePath]) {
+                    const img = new Image();
+                    img.src = imagePath;
+                    imageCache[imagePath] = img;
+                }
+            });
+        }
+        
+        // 页面加载时预加载图片
+        preloadInterfaceImages();
         
         // 新增搜索相关DOM元素
         const modelSearch = document.getElementById('modelSearch');
@@ -1132,13 +1189,37 @@
                 </div>
             `;
             
-            // 使用setTimeout模拟异步搜索
             setTimeout(() => {
                 const results = searchModels(keyword);
                 displaySearchResults(results);
             }, 300);
         }
 
+        // 更新接口预览（选择时或鼠标悬停时）
+        function updateInterfacePreview() {
+            const selectedInterface = interfaceSelect.value;
+            const imagePath = interfaceImageMap[selectedInterface];
+            
+            if (imagePath) {
+                // 设置图片源（浏览器会使用缓存，如果已预加载则立即显示）
+                interfacePreviewImg.src = imagePath;
+                interfacePreviewImg.alt = selectedInterface + '预览图';
+                
+                // 显示预览区域
+                interfacePreview.style.display = 'block';
+                
+                // 如果图片还未缓存，添加到缓存中
+                if (!imageCache[imagePath]) {
+                    const img = new Image();
+                    img.src = imagePath;
+                    imageCache[imagePath] = img;
+                }
+            } else {
+                // 如果没有对应图片，隐藏预览区域
+                interfacePreview.style.display = 'none';
+            }
+        }
+        
         // 根据驱动方式更新接口选项
         function updateInterfaceOptions() {
             const driveType = driveTypeSelect.value;
@@ -1173,6 +1254,9 @@
                     interfaceSelect.value = '1、3针';
                 }
             }
+            
+            // 更新预览图片
+            updateInterfacePreview();
         }
 
         function addOption(select, value, text) {
@@ -1384,7 +1468,7 @@
             return (channelMatch + capacityMatch) / 2;
         }
 
-        // 寻找多控制器组合解决方案 - 增强版
+        // 寻找多控制器组合解决方案 
         function findMultiControllerSolutions(controllers, quantity, totalRequired, perLightRequired, driveType) {
             const solutions = [];
             
@@ -1420,7 +1504,7 @@
                 }
             }
             
-            // 2. 寻找两个不同控制器的组合（原有逻辑）
+            // 2. 寻找两个不同控制器的组合
             const sortedControllers = [...controllers].sort((a, b) => b.channels - a.channels);
             
             for (let i = 0; i < sortedControllers.length; i++) {
@@ -1472,7 +1556,6 @@
             searchResultsContainer.style.display = 'none';
             resultsContainer.style.display = 'block';
             
-            // 使用setTimeout模拟异步操作，确保UI更新
             setTimeout(() => {
                 // 获取用户输入
                 const driveType = document.getElementById('driveType').value;
@@ -2298,6 +2381,9 @@
         recommendBtn.addEventListener('click', recommendControllers);
         resetBtn.addEventListener('click', resetForm);
         driveTypeSelect.addEventListener('change', updateInterfaceOptions);
+        // 鼠标悬停或选择接口时显示预览
+        interfaceSelect.addEventListener('mouseenter', updateInterfacePreview);
+        interfaceSelect.addEventListener('change', updateInterfacePreview);
         
         // 新增搜索相关事件监听
         searchBtn.addEventListener('click', performSearch);
